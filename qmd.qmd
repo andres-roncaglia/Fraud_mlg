@@ -1,0 +1,27 @@
+---
+title: "Untitled"
+format: pdf
+---
+
+Fraude: Si o no
+
+Ingreso anual: En cuantiles
+
+similitud: Similitud del nmombre del email
+
+prev_address_months_count: Es el numero de meses que la persona estuvo viviendo en su locacion anterior descartar???
+
+current_address_months_count
+
+Edad: Edad del cliente en decadas
+
+Dias desde la solicitud
+
+intended_balcon_amount: Valor de la transferecia inicial para aplicar al credito
+
+payment_type: tipo del Plan de pago 
+
+zip_count_4w: numero de aplicaciones con el mismo codigo postal en las ultimas 4 semanas
+
+velocity_6h: Es la velocidad de solicitudes de transferencias de la tarjeta en las ultimas 6 horas
+

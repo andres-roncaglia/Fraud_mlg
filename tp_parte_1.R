@@ -65,10 +65,89 @@ data |>
   geom_density(fill = "firebrick4", color = "black")
 
 
+# Probar combinar las dos densidades con transparecia (el facking andrew)
+
+data |> 
+  filter(fraud_bool == 0) |> 
+  ggplot() +
+  aes(x = payment_type, y = (..count..)/sum(..count..))+
+  geom_bar(color = "black", fill = "firebrick4")
+
+data |> 
+  filter(fraud_bool == 1) |> 
+  ggplot() +
+  aes(x = payment_type, y = (..count..)/sum(..count..))+
+  geom_bar()
 
 
-# Probar combinar las dos densidades con transparecia(el facking andrew)
+# score de riesgo vs fraude
 
+data |> 
+  filter(fraud_bool == 1) |> 
+  ggplot() +
+  aes(x = has_other_cards, y = after_stat(count)/sum(after_stat(count)))+
+  geom_bar(fill = "firebrick4", color = "black")+
+  scale_y_continuous(limits = c(0,1))
+  
+
+data |> 
+  filter(fraud_bool == 0) |> 
+  ggplot() +
+  aes(x = has_other_cards, y = after_stat(count)/sum(after_stat(count)))+
+  geom_bar(fill = "firebrick4", color = "black")+
+  scale_y_continuous(limits = c(0,1))
+
+data |> 
+  filter(fraud_bool == 0) |> 
+  ggplot() +
+  aes(x = foreign_request, y = after_stat(count)/sum(after_stat(count)))+
+  geom_bar(fill = "firebrick4", color = "black")+
+  scale_y_continuous(limits = c(0,1))
+
+
+data |> 
+  filter(fraud_bool == 1) |> 
+  ggplot() +
+  aes(x = foreign_request, y = after_stat(count)/sum(after_stat(count)))+
+  geom_bar(fill = "firebrick4", color = "black")+
+  scale_y_continuous(limits = c(0,1))
+
+
+
+# limite de credito propuesto vs fraude
+
+
+data |> 
+  filter(fraud_bool == 1) |> 
+  ggplot() +
+  aes(x = proposed_credit_limit)+
+  geom_density(fill = "firebrick4", color = "black")
+
+
+data |> 
+  filter(fraud_bool == 0) |> 
+  ggplot() +
+  aes(x = proposed_credit_limit)+
+  geom_histogram(bins = 15, color = "black", fill = "firebrick4")
+
+
+
+# Dominio gratis vs fraude
+
+data |> 
+  filter(fraud_bool == 0) |> 
+  ggplot() +
+  aes(x = email_is_free, y = after_stat(count)/sum(after_stat(count)))+
+  geom_bar(fill = "firebrick4", color = "black")+
+  scale_y_continuous(limits = c(0,1))
+
+
+data |> 
+  filter(fraud_bool == 1) |> 
+  ggplot() +
+  aes(x = email_is_free, y = after_stat(count)/sum(after_stat(count)))+
+  geom_bar(fill = "firebrick4", color = "black")+
+  scale_y_continuous(limits = c(0,1))
 
 
 

@@ -9,9 +9,9 @@ Ingreso anual: En cuantiles
 
 similitud: Similitud del nmombre del email
 
-prev_address_months_count: Es el numero de meses que la persona estuvo viviendo en su locacion anterior descartar???
+prev_address_months_count: Es el numero de meses que la persona estuvo viviendo en su locacion anterior
 
-current_address_months_count
+current_address_months_count: Es el numero de meses que la persona estuvo viviendo en su locacion actual
 
 Edad: Edad del cliente en decadas
 
@@ -23,5 +23,53 @@ payment_type: tipo del Plan de pago
 
 zip_count_4w: numero de aplicaciones con el mismo codigo postal en las ultimas 4 semanas
 
-velocity_6h: Es la velocidad de solicitudes de transferencias de la tarjeta en las ultimas 6 horas
+velocity_6h: Es la velocidad del total de solicitudes de transferencias de la tarjeta en las ultimas 6 horas
+
+velocity_24h: Es la velocidad del total de solicitudes de transferencias de la tarjeta en las ultimas 24 horas
+
+velocity_4w: Es la velocidad del total de solicitudes de transferencias de la tarjeta en las ultimas 4 semanas
+
+bank_branch_count_8w: Numero total de solicitudes en la seleccionada rama del banco en las ultimas 8 semanas
+
+date_of_birth_distinct_emails_4w: Numero de emails de aplicantes con la misma fecha de nacimiento en las ultimas 4 semanas
+
+employment_status: Estado de empleo del solicitante
+
+credit_risk_score: Score de riesgo de la aplicacion
+
+email_is_free: Tipo del dominio del email del aplicante (email pago o gratis)
+
+housing_status: Estado residencial del aplicante
+
+phone_home_valid: Validez del telefono fijo provisto
+
+phone_mobile_valid: Validez del telefono movil provisto
+
+bank_months_count: Antiguedad de la cuenta anterior en meses
+
+has_other_cards: Indicador de si la persona tiene otra tarjeta en el mismo banco
+
+proposed_credit_limit: Credito limite propuesto por el aplicante
+
+foreign_request: Indicadora de si la solicitud fue hecha en el mismo pais que el banco
+
+source: Fuente online de la aplicacion (Internet / app movil) 
+
+session_length_in_minutes: Tiempo de la sesion en la pagina del banco en minutos
+
+device_os: Sistema operativo del dispositivo que hizo la solicitud
+
+keep_alive_session: indicadora de si el solicitante decidio mantener la sesion iniciada al ingresar
+
+device_distinct_emails_8w: Numero de emails distintos en la pagina del banco desde el mismo dispositivo usado en las ultimas 8 semanas
+
+device_fraud_count: Numero de solicitudes fraudulentas desde el dispositivo utilizado 
+
+month: Mes en el que fue realizada la solicitud
+
+
+
+
+
+
 

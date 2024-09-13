@@ -27,7 +27,7 @@ data |> ggplot() +
 
 unique(data$source)
 # geom_bar(aes(, fill = "skyblue") +
-  
+
 
 table(data$prev_address_months_count)
 # income vs fraud
@@ -88,7 +88,7 @@ data |>
   aes(x = has_other_cards, y = after_stat(count)/sum(after_stat(count)))+
   geom_bar(fill = "firebrick4", color = "black")+
   scale_y_continuous(limits = c(0,1))
-  
+
 
 data |> 
   filter(fraud_bool == 0) |> 
@@ -140,14 +140,5 @@ data |>
   aes(x = email_is_free, y = after_stat(count)/sum(after_stat(count)))+
   geom_bar(fill = "firebrick4", color = "black")+
   scale_y_continuous(limits = c(0,1))
-
-
-data |> 
-  filter(fraud_bool == 1) |> 
-  ggplot() +
-  aes(x = email_is_free, y = after_stat(count)/sum(after_stat(count)))+
-  geom_bar(fill = "firebrick4", color = "black")+
-  scale_y_continuous(limits = c(0,1))
-
 
 

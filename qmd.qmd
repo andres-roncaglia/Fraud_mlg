@@ -1,71 +1,138 @@
 ---
-title: "Untitled"
-format: pdf
+format: 
+  pdf:
+    fig-pos: "H"
+lang: es
+echo: FALSE
+message: FALSE
+warning: FALSE
+fig-cap-location: top
+geometry: 
+- top= 25mm
+- left= 20mm
+- right = 20mm
+- bottom = 25mm
 ---
 
-Fraude: Si o no
 
-Ingreso anual: En cuantiles
+::: {.center data-latex=""}
 
-similitud: Similitud del nmombre del email
+\vspace{3cm}
 
-prev_address_months_count: Es el numero de meses que la persona estuvo viviendo en su locacion anterior
+```{r logo facultad, echo=F, include = T, out.width= "60%"}
+knitr::include_graphics("logounr.png")
+```
 
-current_address_months_count: Es el numero de meses que la persona estuvo viviendo en su locacion actual
+\pagenumbering{gobble}
 
-Edad: Edad del cliente en decadas
+\vspace{5cm}
 
-Dias desde la solicitud
+\Large
+**LICENCIATURA EN ESTADÍSTICA**
 
-intended_balcon_amount: Valor de la transferecia inicial para aplicar al credito
+\vspace{1cm}
 
-payment_type: tipo del Plan de pago 
+\Large
+**DETECCIÓN DE FRAUDE**
 
-zip_count_4w: numero de aplicaciones con el mismo codigo postal en las ultimas 4 semanas
 
-velocity_6h: Es la velocidad del total de solicitudes de transferencias de la tarjeta en las ultimas 6 horas
+\vspace{0.3cm}
+\large
 
-velocity_24h: Es la velocidad del total de solicitudes de transferencias de la tarjeta en las ultimas 24 horas
+*Un análisis con modelos lineales generalizados*
 
-velocity_4w: Es la velocidad del total de solicitudes de transferencias de la tarjeta en las ultimas 4 semanas
+\vspace{9cm}
 
-bank_branch_count_8w: Numero total de solicitudes en la seleccionada rama del banco en las ultimas 8 semanas
+\large
 
-date_of_birth_distinct_emails_4w: Numero de emails de aplicantes con la misma fecha de nacimiento en las ultimas 4 semanas
+**Autores: Franco Santini - Nicolas Gamboa - Andrés Roncaglia**
 
-employment_status: Estado de empleo del solicitante
+**Docentes: Boggio Gabriela - Harvey Guillermina - Costa Vicotorio**
 
-credit_risk_score: Score de riesgo de la aplicacion
+**2024**
+\normalsize
+\newpage
+\hypersetup{linkcolor = black}
+\tableofcontents
 
-email_is_free: Tipo del dominio del email del aplicante (email pago o gratis)
 
-housing_status: Estado residencial del aplicante
+\newpage
+\pagenumbering{arabic}
 
-phone_home_valid: Validez del telefono fijo provisto
+:::
 
-phone_mobile_valid: Validez del telefono movil provisto
+\newpage
 
-bank_months_count: Antiguedad de la cuenta anterior en meses
 
-has_other_cards: Indicador de si la persona tiene otra tarjeta en el mismo banco
+# Introducción
 
-proposed_credit_limit: Credito limite propuesto por el aplicante
+El fraude con tarjetas de crédito es una de las principales amenazas que sufren los bancos. Con el auge de la tecnología las transacciones digitales facilitaron los traspasos de dinero y los medios de pago electrónicos son algo de cada día, pero junto con las ventajas también vinieron las consecuencias, y es que los métodos de fraude se han vuelto más sofisticados, generando pérdidas significativas a los bancos y afectando la confianza de los usuarios. Actividades como el uso no autorizado de tarjetas, la clonación de datos y transacciones fraudulentas requieren el desarrollo de tecnologías avanzadas para la detección temprana y la prevención.
 
-foreign_request: Indicadora de si la solicitud fue hecha en el mismo pais que el banco
+# Variables:
 
-source: Fuente online de la aplicacion (Internet / app movil) 
+- fraud_bool: Indicadora de si la transacción fue fraude o no
 
-session_length_in_minutes: Tiempo de la sesion en la pagina del banco en minutos
+- income: Ingreso anual en cuantiles
 
-device_os: Sistema operativo del dispositivo que hizo la solicitud
+- name_email_similarity: Similitud del nombre en el email y el nombre del solicitante
 
-keep_alive_session: indicadora de si el solicitante decidio mantener la sesion iniciada al ingresar
+- prev_address_months_count: Es el número de meses que la persona estuvo viviendo en su locacion anterior
 
-device_distinct_emails_8w: Numero de emails distintos en la pagina del banco desde el mismo dispositivo usado en las ultimas 8 semanas
+- current_address_months_count: Es el número de meses que la persona estuvo viviendo en su locacion actual
 
-device_fraud_count: Numero de solicitudes fraudulentas desde el dispositivo utilizado 
+- customer_age: Edad del cliente en decadas
 
-month: Mes en el que fue realizada la solicitud
+- days_since_request: Días desde la solicitud
+
+- intended_balcon_amount: Valor de la transferecia inicial para aplicar al credito
+
+- payment_type: Tipo del plan de pago 
+
+- zip_count_4w: Número de aplicaciónes con el mismo código postal en las últimas 4 semanas
+
+- velocity_6h: Es la velocidad del total de solicitudes de transferencias de la tarjeta en las últimas 6 horas
+
+- velocity_24h: Es la velocidad del total de solicitudes de transferencias de la tarjeta en las últimas 24 horas
+
+- velocity_4w: Es la velocidad del total de solicitudes de transferencias de la tarjeta en las últimas 4 semanas
+
+- bank_branch_count_8w: Número total de solicitudes en la seleccionada rama del banco en las últimas 8 semanas
+
+- date_of_birth_distinct_emails_4w: Número de emails de aplicantes con la misma fecha de nacimiento en las últimas 4 semanas
+
+- employment_status: Estado de empleo del solicitante
+
+- credit_risk_score: Score de riesgo de la aplicación
+
+- email_is_free: Tipo del dominio del email del aplicante (email pago o gratis)
+
+- housing_status: Estado residencial del aplicante
+
+- phone_home_valid: Validez del telefono fijo provisto
+
+- phone_mobile_valid: Validez del telefono movil provisto
+
+- bank_months_count: Antiguedad de la cuenta anterior en meses
+
+- has_other_cards: Indicador de si la persona tiene otra tarjeta en el mismo banco
+
+- proposed_credit_limit: Crédito limite propuesto por el aplicante
+
+- foreign_request: Indicadora de si la solicitud fue hecha en el mismo pais que el banco
+
+- source: Fuente online de la aplicación (Internet / app movil) 
+
+- session_length_in_minutes: Tiempo de la sesion en la pagina del banco en minutos
+
+- device_os: Sistema operativo del dispositivo que hizo la solicitud
+
+- keep_alive_session: Indicadora de si el solicitante decidió mantener la sesión iniciada al ingresar
+
+- device_distinct_emails_8w: Número de emails distintos en la página del banco desde el mismo dispositivo usado en las últimas 8 semanas
+
+- device_fraud_count: Número de solicitudes fraudulentas desde el dispositivo utilizado 
+
+- month: Mes en el que fue realizada la solicitud
 
 
 

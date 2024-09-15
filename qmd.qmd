@@ -135,8 +135,245 @@ El fraude con tarjetas de crédito es una de las principales amenazas que sufren
 - month: Mes en el que fue realizada la solicitud
 
 
+# Análisis descriptivo
+
+```{r, include=FALSE}
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+library(patchwork)
+
+```
+
+
+```{r}
+data <- read.csv("Data/Base_resumida.csv") |> 
+  mutate(
+    income = factor(income),
+    proposed_credit_limit_cat = case_when(proposed_credit_limit == 190 ~ 200,
+                                          proposed_credit_limit == 200 ~ 200,
+                                          proposed_credit_limit == 210 ~ 200,
+                                          proposed_credit_limit == 490 ~ 500,
+                                          proposed_credit_limit == 500 ~ 500,
+                                          proposed_credit_limit == 510 ~ 500,
+                                          proposed_credit_limit == 990 ~ 1000,
+                                          proposed_credit_limit == 1000 ~ 1000,
+                                          proposed_credit_limit == 1500 ~ 1500,
+                                          proposed_credit_limit == 1900 ~ 2000,
+                                          proposed_credit_limit == 2000 ~ 2000,
+                                          T ~ 2000))
+
+data <- data |> 
+  mutate(
+    proposed_credit_limit_cat = factor(proposed_credit_limit_cat),
+    has_other_cards = factor(has_other_cards),
+    foreign_request = factor(foreign_request),
+    phone_home_valid = factor(phone_home_valid),
+    phone_mobile_valid = factor(phone_mobile_valid),
+    email_is_free = factor(email_is_free),
+    keep_alive_session = factor(keep_alive_session)
+  )
+```
+
+
+
+```{r}
+((data |> 
+  filter(fraud_bool == 0) |> 
+  ggplot() +
+  aes(x = income, y = (after_stat(count))/sum(after_stat(count)))+
+  geom_bar() +
+  scale_y_continuous(limits = c(0,0.45)) +
+  ggtitle("No fraude"))+
+(data |> 
+   filter(fraud_bool == 1) |> 
+   ggplot() +
+   aes(x = income, y = (after_stat(count))/sum(after_stat(count)))+
+   geom_bar() +
+   scale_y_continuous(limits = c(0,0.45)) +
+   ggtitle("Fraude")))+plot_annotation(title = "Title 1")
+```
+
+Se puede observar que las personas que cometieron fraude tienden a tener un ingreso anual registrado mayor. La distribución tiene una mayor asimetría a la izquierda
 
 
 
 
+```{r}
+(data |> 
+  filter(fraud_bool == 0) |> 
+  ggplot() +
+  aes(x = name_email_similarity, y = ..density..)+
+  geom_histogram(bins = 15, color = "black", fill = "firebrick4") +
+  scale_y_continuous(limits = c(0,2.25)) +
+  ggtitle("No fraude")) +
+(data |> 
+  filter(fraud_bool == 1) |> 
+  ggplot() +
+  aes(x = name_email_similarity, y = ..density..)+
+  geom_histogram(bins = 15, color = "black", fill = "firebrick4") +
+  scale_y_continuous(limits = c(0,2.25)) +
+  ggtitle("Fraude"))
+```
+
+Se puede observar que las personas que cometen fraude suelen en general tener una menor similitud entre el nombre y el email.
+
+
+
+
+
+```{r}
+(data |> 
+  filter(fraud_bool == 0) |> 
+  ggplot() +
+  aes(x = payment_type, y = (..count..)/sum(..count..))+
+  geom_bar(color = "black", fill = "firebrick4")+
+  scale_y_continuous(limits = c(0,0.4)) +
+  ggtitle("No fraude")) +
+(data |> 
+  filter(fraud_bool == 1) |> 
+  ggplot() +
+  aes(x = payment_type, y = (..count..)/sum(..count..))+
+  geom_bar(color = "black", fill = "firebrick4") +
+  scale_y_continuous(limits = c(0,0.4)) +
+  ggtitle("Fraude"))
+```
+
+
+Se puede observar que las personas que cometen fraude en general parecen pagar menos con el método AA y más con el método AC que las personas que no cometen fraude.
+
+
+
+
+```{r}
+(data |> 
+  filter(fraud_bool == 0) |> 
+  ggplot() +
+  aes(x = has_other_cards, y = after_stat(count)/sum(after_stat(count)))+
+  geom_bar(fill = "firebrick4", color = "black")+
+  scale_y_continuous(limits = c(0,1))+
+  ggtitle("No fraude")) +
+(data |> 
+  filter(fraud_bool == 1) |> 
+  ggplot() +
+  aes(x = has_other_cards, y = after_stat(count)/sum(after_stat(count)))+
+  geom_bar(fill = "firebrick4", color = "black")+
+  scale_y_continuous(limits = c(0,1))+
+  ggtitle("Fraude"))
+```
+
+
+# Se puede observar que las proporción de personas que tienen otras tarjetas parece ser menor entre las personas que comieron fraude.
+
+
+```{r}
+(data |> 
+  filter(fraud_bool == 0) |> 
+  ggplot() +
+  aes(x = foreign_request, y = after_stat(count)/sum(after_stat(count)))+
+  geom_bar(fill = "firebrick4", color = "black")+
+  scale_y_continuous(limits = c(0,1))+
+  ggtitle("No fraude")) +
+ (data |> 
+  filter(fraud_bool == 1) |> 
+  ggplot() +
+  aes(x = foreign_request, y = after_stat(count)/sum(after_stat(count)))+
+  geom_bar(fill = "firebrick4", color = "black")+
+  scale_y_continuous(limits = c(0,1))+
+  ggtitle("Fraude"))
+```
+
+
+Se puede observar que las personas que cometen fraude, parecen hacer más solicitudes del exterior que las personas que no cometen fraude, aunque la diferencia parece ser sutil
+
+
+
+```{r}
+(data |> 
+  filter(fraud_bool == 0) |> 
+  ggplot() +
+  aes(x = proposed_credit_limit_cat, y = after_stat(count)/sum(after_stat(count)))+
+  geom_bar(color = "black", fill = "firebrick4")+
+  scale_y_continuous(limits = c(0,0.65))+
+  ggtitle("No fraude")) +
+(data |> 
+  filter(fraud_bool == 1) |> 
+  ggplot() +
+  aes(x = proposed_credit_limit_cat, y = after_stat(count)/sum(after_stat(count)))+
+  geom_bar(color = "black", fill = "firebrick4") +
+  scale_y_continuous(limits = c(0,0.65))+
+  ggtitle("Fraude"))
+```
+
+Se puede observar que las personas que cometen fraude parecen pedir limites de créditos más altos que aquellos que no cometen fraude
+
+
+
+```{r}
+(data |> 
+  filter(fraud_bool == 0) |> 
+  ggplot() +
+  aes(x = email_is_free, y = after_stat(count)/sum(after_stat(count)))+
+  geom_bar(fill = "firebrick4", color = "black")+
+  scale_y_continuous(limits = c(0,1))+
+  ggtitle("No fraude"))+
+(data |> 
+  filter(fraud_bool == 1) |> 
+  ggplot() +
+  aes(x = email_is_free, y = after_stat(count)/sum(after_stat(count)))+
+  geom_bar(fill = "firebrick4", color = "black")+
+  scale_y_continuous(limits = c(0,1))+
+  ggtitle("Fraude"))
+```
+
+Se puede observar que las personas que cometen fraude parecen tener una mayor proporción de emails con dominios gratuitos.
+
+
+
+
+```{r}
+(data |> 
+    filter(fraud_bool == 0) |> 
+    ggplot() +
+    aes(x = credit_risk_score, y = after_stat(count)/sum(after_stat(count)))+
+    geom_histogram(fill = "firebrick4", color = "black", bins = 20)+
+    scale_y_continuous(limits = c(0, 0.2)) +
+    scale_x_continuous(limits = c(-200, 400)) +
+    ggtitle("No fraude")) +
+(data |> 
+    filter(fraud_bool == 1) |> 
+    ggplot() +
+    aes(x = credit_risk_score, y = after_stat(count)/sum(after_stat(count)))+
+    geom_histogram(fill = "firebrick4", color = "black", bins = 20)+
+    scale_y_continuous(limits = c(0, 0.2)) +
+    scale_x_continuous(limits = c(-200, 400)) +
+    ggtitle("Fraude"))
+```
+
+
+Se puede observar que la distribución del score de riesgo para las personas que cometen fraude es simetrica y centrada alrededor de 200, mientras que la distribucion del score de riesgo para las personas que no cometen fraude parece ser más asimétrica y tener una media menor.
+
+
+
+
+```{r}
+(data |> 
+    filter(fraud_bool == 0) |> 
+    ggplot() +
+    aes(x = keep_alive_session, y = after_stat(count)/sum(after_stat(count)))+
+    geom_bar(fill = "firebrick4", color = "black")+
+    scale_y_continuous(limits = c(0,1)) +
+    ggtitle("No fraude")) +
+  (data |> 
+     filter(fraud_bool == 1) |> 
+     ggplot() +
+     aes(x = keep_alive_session, y = after_stat(count)/sum(after_stat(count)))+
+     geom_bar(fill = "firebrick4", color = "black")+
+     scale_y_continuous(limits = c(0,1)) +
+     ggtitle("Fraude"))
+
+```
+
+
+No estoy del todo seguro qué es esto
 

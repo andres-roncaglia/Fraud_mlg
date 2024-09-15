@@ -70,70 +70,71 @@ El fraude con tarjetas de crédito es una de las principales amenazas que sufren
 
 # Variables:
 
-- fraud_bool: Indicadora de si la transacción fue fraude o no
+- `fraud_bool`: Indicadora de si la transacción fue fraude o no
 
-- income: Ingreso anual en cuantiles
+- `income`: Ingreso anual en cuantiles
 
-- name_email_similarity: Similitud del nombre en el email y el nombre del solicitante
+- `name_email_similarity`: Similitud del nombre en el email y el nombre del solicitante
 
-- prev_address_months_count: Es el número de meses que la persona estuvo viviendo en su locacion anterior
+- `prev_address_months_count`: Es el número de meses que la persona estuvo viviendo en su locacion anterior
 
-- current_address_months_count: Es el número de meses que la persona estuvo viviendo en su locacion actual
+- `current_address_months_count`: Es el número de meses que la persona estuvo viviendo en su locacion actual
 
-- customer_age: Edad del cliente en decadas
+- `customer_age`: Edad del cliente en décadas
 
-- days_since_request: Días desde la solicitud
+- `days_since_request`: Días desde la solicitud
 
-- intended_balcon_amount: Valor de la transferecia inicial para aplicar al credito
+- `intended_balcon_amount`: Valor de la transferecia inicial para aplicar al credito
 
-- payment_type: Tipo del plan de pago 
+- `payment_type`: Tipo del plan de pago 
 
-- zip_count_4w: Número de aplicaciónes con el mismo código postal en las últimas 4 semanas
+- `zip_count_4w`: Número de aplicaciónes con el mismo código postal en las últimas 4 semanas
 
-- velocity_6h: Es la velocidad del total de solicitudes de transferencias de la tarjeta en las últimas 6 horas
+- `velocity_6h`: Es la velocidad del total de solicitudes de transferencias de la tarjeta en las últimas 6 horas
 
-- velocity_24h: Es la velocidad del total de solicitudes de transferencias de la tarjeta en las últimas 24 horas
+- `velocity_24h`: Es la velocidad del total de solicitudes de transferencias de la tarjeta en las últimas 24 horas
 
-- velocity_4w: Es la velocidad del total de solicitudes de transferencias de la tarjeta en las últimas 4 semanas
+- `velocity_4w`: Es la velocidad del total de solicitudes de transferencias de la tarjeta en las últimas 4 semanas
 
-- bank_branch_count_8w: Número total de solicitudes en la seleccionada rama del banco en las últimas 8 semanas
+- `bank_branch_count_8w`: Número total de solicitudes en la seleccionada rama del banco en las últimas 8 semanas
 
-- date_of_birth_distinct_emails_4w: Número de emails de aplicantes con la misma fecha de nacimiento en las últimas 4 semanas
+- `date_of_birth_distinct_emails_4w`: Número de emails de aplicantes con la misma fecha de nacimiento en las últimas 4 semanas
 
-- employment_status: Estado de empleo del solicitante
+- `employment_status`: Estado de empleo del solicitante
 
-- credit_risk_score: Score de riesgo de la aplicación
+- `credit_risk_score`: Score de riesgo de la aplicación
 
-- email_is_free: Tipo del dominio del email del aplicante (email pago o gratis)
+- `email_is_free`: Tipo del dominio del email del aplicante (email pago o gratis)
 
-- housing_status: Estado residencial del aplicante
+- `housing_status`: Estado residencial del aplicante
 
-- phone_home_valid: Validez del telefono fijo provisto
+- `phone_home_valid`: Validez del telefono fijo provisto
 
-- phone_mobile_valid: Validez del telefono movil provisto
+- `phone_mobile_valid`: Validez del telefono movil provisto
 
-- bank_months_count: Antiguedad de la cuenta anterior en meses
+- `bank_months_count`: Antiguedad de la cuenta anterior en meses
 
-- has_other_cards: Indicador de si la persona tiene otra tarjeta en el mismo banco
+- `has_other_cards`: Indicador de si la persona tiene otra tarjeta en el mismo banco
 
-- proposed_credit_limit: Crédito limite propuesto por el aplicante
+- `proposed_credit_limit`: Crédito limite propuesto por el aplicante
 
-- foreign_request: Indicadora de si la solicitud fue hecha en el mismo pais que el banco
+- `foreign_request`: Indicadora de si la solicitud fue hecha en el mismo pais que el banco
 
-- source: Fuente online de la aplicación (Internet / app movil) 
+- `source`: Fuente online de la aplicación (Internet / app movil) 
 
-- session_length_in_minutes: Tiempo de la sesion en la pagina del banco en minutos
+- `session_length_in_minutes`: Tiempo de la sesion en la pagina del banco en minutos
 
-- device_os: Sistema operativo del dispositivo que hizo la solicitud
+- `device_os`: Sistema operativo del dispositivo que hizo la solicitud
 
-- keep_alive_session: Indicadora de si el solicitante decidió mantener la sesión iniciada al ingresar
+- `keep_alive_session`: Indicadora de si el solicitante decidió mantener la sesión iniciada al ingresar
 
-- device_distinct_emails_8w: Número de emails distintos en la página del banco desde el mismo dispositivo usado en las últimas 8 semanas
+- `device_distinct_emails_8w`: Número de emails distintos en la página del banco desde el mismo dispositivo usado en las últimas 8 semanas
 
-- device_fraud_count: Número de solicitudes fraudulentas desde el dispositivo utilizado 
+- `device_fraud_count`: Número de solicitudes fraudulentas desde el dispositivo utilizado 
 
-- month: Mes en el que fue realizada la solicitud
+- `month`: Mes en el que fue realizada la solicitud
 
+\newpage
 
 # Análisis descriptivo
 
@@ -142,6 +143,12 @@ library(ggplot2)
 library(dplyr)
 library(tidyr)
 library(patchwork)
+
+theme_set(theme_bw() + 
+            theme(plot.title = element_text(hjust = 0.5),
+                  legend.position = "bottom"))
+
+knitr::opts_chunk$set(fig.align = "center")
 
 ```
 
@@ -165,6 +172,7 @@ data <- read.csv("Data/Base_resumida.csv") |>
 
 data <- data |> 
   mutate(
+    fraud_bool = factor(fraud_bool),
     proposed_credit_limit_cat = factor(proposed_credit_limit_cat),
     has_other_cards = factor(has_other_cards),
     foreign_request = factor(foreign_request),
@@ -178,202 +186,225 @@ data <- data |>
 
 
 ```{r}
+#| fig-cap: "Distribución del ingreso anual según si la transacción es fraudulenta o no"
+
 ((data |> 
   filter(fraud_bool == 0) |> 
   ggplot() +
   aes(x = income, y = (after_stat(count))/sum(after_stat(count)))+
-  geom_bar() +
+  geom_bar(color = "black", fill = "#284B63") +
+  xlab(label = "Ingreso anual") +
+  ylab(label = "Proporción") +
   scale_y_continuous(limits = c(0,0.45)) +
-  ggtitle("No fraude"))+
+  ggtitle("No fraude")) +
 (data |> 
    filter(fraud_bool == 1) |> 
    ggplot() +
    aes(x = income, y = (after_stat(count))/sum(after_stat(count)))+
-   geom_bar() +
+   geom_bar(color = "black", fill = "#F15946") +
+   xlab(label = "Ingreso anual") +
+   ylab(label = "Proporción") +
    scale_y_continuous(limits = c(0,0.45)) +
-   ggtitle("Fraude")))+plot_annotation(title = "Title 1")
+   ggtitle("Fraude"))) + plot_layout(axes = "collect")
 ```
 
-Se puede observar que las personas que cometieron fraude tienden a tener un ingreso anual registrado mayor. La distribución tiene una mayor asimetría a la izquierda
-
-
+Se puede observar que las personas que cometieron fraude tienden a tener un ingreso anual registrado mayor. La distribución tiene una mayor asimetría a la izquierda.
 
 
 ```{r}
+#| fig-cap: "Distribución del índice de similitud entre en nombre del solicitante y el nombre en el email según si la transacción es fraudulenta o no"
+
 (data |> 
   filter(fraud_bool == 0) |> 
   ggplot() +
   aes(x = name_email_similarity, y = ..density..)+
-  geom_histogram(bins = 15, color = "black", fill = "firebrick4") +
+  geom_histogram(bins = 15, color = "black", fill = "#284B63") +
   scale_y_continuous(limits = c(0,2.25)) +
+  xlab(label = "Simililaridad nombre-email") +
+  ylab(label = "Proporción") +
   ggtitle("No fraude")) +
 (data |> 
   filter(fraud_bool == 1) |> 
   ggplot() +
   aes(x = name_email_similarity, y = ..density..)+
-  geom_histogram(bins = 15, color = "black", fill = "firebrick4") +
+  geom_histogram(bins = 15, color = "black", fill = "#F15946") +
   scale_y_continuous(limits = c(0,2.25)) +
-  ggtitle("Fraude"))
+  xlab(label = "Simililaridad nombre-email") +
+  ylab(label = "Proporción") +
+  ggtitle("Fraude")) + plot_layout(axes = "collect")
 ```
 
-Se puede observar que las personas que cometen fraude suelen en general tener una menor similitud entre el nombre y el email.
-
-
+Las transacciones realizadas con emails no muy similares al nombre real de la persona parecen ser más propensas a ser fraudulentas. 
 
 
 
 ```{r}
+#| fig-cap: "Proporción del tipo de pago según si la transacción es fraudulenta o no"
+
 (data |> 
   filter(fraud_bool == 0) |> 
   ggplot() +
   aes(x = payment_type, y = (..count..)/sum(..count..))+
-  geom_bar(color = "black", fill = "firebrick4")+
+  geom_bar(color = "black", fill = "#284B63") +
+  xlab(label = "Tipo del plan de pago") +
+  ylab(label = "Proporción") +
   scale_y_continuous(limits = c(0,0.4)) +
   ggtitle("No fraude")) +
 (data |> 
   filter(fraud_bool == 1) |> 
   ggplot() +
   aes(x = payment_type, y = (..count..)/sum(..count..))+
-  geom_bar(color = "black", fill = "firebrick4") +
+  geom_bar(color = "black", fill = "#F15946") +
+  xlab(label = "Tipo del plan de pago") +
+  ylab(label = "Proporción") +
   scale_y_continuous(limits = c(0,0.4)) +
-  ggtitle("Fraude"))
+  ggtitle("Fraude")) + plot_layout(axes = "collect")
 ```
 
-
-Se puede observar que las personas que cometen fraude en general parecen pagar menos con el método AA y más con el método AC que las personas que no cometen fraude.
-
-
+En general, las personas que cometen fraude parecen preferir los métodos de pago "AB" y "AC" por encima del resto, al contrario de las personas que operan de manera legítima que prefieren de igual manera los tipos de pago "AA", "AB" y "AC". Se puede notar también que la forma de pago "AE" no es muy popular.
 
 
 ```{r}
-(data |> 
-  filter(fraud_bool == 0) |> 
-  ggplot() +
-  aes(x = has_other_cards, y = after_stat(count)/sum(after_stat(count)))+
-  geom_bar(fill = "firebrick4", color = "black")+
-  scale_y_continuous(limits = c(0,1))+
-  ggtitle("No fraude")) +
-(data |> 
-  filter(fraud_bool == 1) |> 
-  ggplot() +
-  aes(x = has_other_cards, y = after_stat(count)/sum(after_stat(count)))+
-  geom_bar(fill = "firebrick4", color = "black")+
-  scale_y_continuous(limits = c(0,1))+
-  ggtitle("Fraude"))
-```
+#| fig-cap: "Distribución del límite crediticio propuesto por el solicitante según si la transacción es fraudulenta o no"
 
-
-# Se puede observar que las proporción de personas que tienen otras tarjetas parece ser menor entre las personas que comieron fraude.
-
-
-```{r}
-(data |> 
-  filter(fraud_bool == 0) |> 
-  ggplot() +
-  aes(x = foreign_request, y = after_stat(count)/sum(after_stat(count)))+
-  geom_bar(fill = "firebrick4", color = "black")+
-  scale_y_continuous(limits = c(0,1))+
-  ggtitle("No fraude")) +
- (data |> 
-  filter(fraud_bool == 1) |> 
-  ggplot() +
-  aes(x = foreign_request, y = after_stat(count)/sum(after_stat(count)))+
-  geom_bar(fill = "firebrick4", color = "black")+
-  scale_y_continuous(limits = c(0,1))+
-  ggtitle("Fraude"))
-```
-
-
-Se puede observar que las personas que cometen fraude, parecen hacer más solicitudes del exterior que las personas que no cometen fraude, aunque la diferencia parece ser sutil
-
-
-
-```{r}
 (data |> 
   filter(fraud_bool == 0) |> 
   ggplot() +
   aes(x = proposed_credit_limit_cat, y = after_stat(count)/sum(after_stat(count)))+
-  geom_bar(color = "black", fill = "firebrick4")+
+  geom_bar(color = "black", fill = "#284B63") +
+  xlab(label = "Crédito límite propuesto") +
+  ylab(label = "Proporción") +
   scale_y_continuous(limits = c(0,0.65))+
   ggtitle("No fraude")) +
 (data |> 
   filter(fraud_bool == 1) |> 
   ggplot() +
   aes(x = proposed_credit_limit_cat, y = after_stat(count)/sum(after_stat(count)))+
-  geom_bar(color = "black", fill = "firebrick4") +
+  geom_bar(color = "black", fill = "#F15946") +
+  xlab(label = "Crédito límite propuesto") +
+  ylab(label = "Proporción") +
   scale_y_continuous(limits = c(0,0.65))+
-  ggtitle("Fraude"))
+  ggtitle("Fraude")) + plot_layout(axes = "collect")
 ```
 
-Se puede observar que las personas que cometen fraude parecen pedir limites de créditos más altos que aquellos que no cometen fraude
+Se puede destacar en este gráfico que las personas que cometen fraude son ligeramente más propensas a pedir créditos más altos.
+
+
+```{r}
+#| fig-cap: "Proporción de la tenencia de otra tarjeta en el mismo banco según si la transacción es fraudulenta o no"
+
+(data |> 
+   group_by(fraud_bool, has_other_cards) |> 
+   summarise(prop = n()) |> 
+   mutate(prop = prop/sum(prop)) |> 
+  ggplot() +
+  aes(x = has_other_cards, y = prop, fill = fraud_bool, group = fraud_bool)+
+  geom_bar(color = "black", position = "dodge", stat = "identity") +
+  xlab(label = "Tenencia de otras tarjetas") +
+  ylab(label = "Proporción") +
+  labs(fill = "Fraude") +
+  scale_fill_manual(values = c("#284B63","#F15946"),labels = c("No","Si")) +
+  scale_x_discrete(labels = c("0" = "No","1" = "Si")) +
+  scale_y_continuous(limits = c(0,1)))
+```
+
+En cuanto a la tenencia de otra tarjeta en el mismo banco, suele ser común no poseer otra, sin embargo las personas que operan de forma legal se inclinan a tener más de una tarjeta un poco más que aquellos que cometen fraude.
+
+```{r}
+#| fig-cap: "Proporción de la locación de la solicitud según si la transacción es fraudulenta o no"
+
+(data |> 
+   group_by(fraud_bool, foreign_request) |> 
+   summarise(prop = n()) |> 
+   mutate(prop = prop/sum(prop)) |> 
+  ggplot() +
+  aes(x = foreign_request, y = prop, fill = fraud_bool, group = fraud_bool)+
+  geom_bar(color = "black", position = "dodge", stat = "identity") +
+  xlab(label = "Solicitud extranjera") +
+  ylab(label = "Proporción") +
+  labs(fill = "Fraude") +
+  scale_fill_manual(values = c("#284B63","#F15946"),labels = c("No","Si")) +
+  scale_x_discrete(labels = c("0" = "No","1" = "Si")) +
+  scale_y_continuous(limits = c(0,1)))
+  
+```
+
+
+Se puede observar que las personas que cometen fraude, parecen hacer más solicitudes del exterior que las personas que no cometen fraude, aunque la diferencia parece ser sutil.
+
 
 
 
 ```{r}
+#| fig-cap: "Proporción del tipo de dominio del email según si la transacción es fraudulenta o no"
+
 (data |> 
-  filter(fraud_bool == 0) |> 
+   group_by(fraud_bool, email_is_free) |> 
+   summarise(prop = n()) |> 
+   mutate(prop = prop/sum(prop)) |> 
   ggplot() +
-  aes(x = email_is_free, y = after_stat(count)/sum(after_stat(count)))+
-  geom_bar(fill = "firebrick4", color = "black")+
-  scale_y_continuous(limits = c(0,1))+
-  ggtitle("No fraude"))+
-(data |> 
-  filter(fraud_bool == 1) |> 
-  ggplot() +
-  aes(x = email_is_free, y = after_stat(count)/sum(after_stat(count)))+
-  geom_bar(fill = "firebrick4", color = "black")+
-  scale_y_continuous(limits = c(0,1))+
-  ggtitle("Fraude"))
+  aes(x = email_is_free, y = prop, fill = fraud_bool, group = fraud_bool)+
+  geom_bar(color = "black", position = "dodge", stat = "identity") +
+  xlab(label = "Dominio del email") +
+  ylab(label = "Proporción") +
+  labs(fill = "Fraude") +
+  scale_fill_manual(values = c("0" = "#284B63", "1" = "#F15946"),labels = c("No","Si")) +
+  scale_x_discrete(labels = c("0" = "Pago","1" = "Gratuito")) +
+  scale_y_continuous(limits = c(0,1)))
 ```
 
-Se puede observar que las personas que cometen fraude parecen tener una mayor proporción de emails con dominios gratuitos.
-
-
-
+También se puede destacar que las operaciones fraudulentas parecen ser más comunes cuando el dominio del email del solicitante es gratuito que cuando es pago.
 
 ```{r}
+#| fig-cap: "Distribución del score de riesgo interno según si la transacción es fraudulenta o no"
+
 (data |> 
     filter(fraud_bool == 0) |> 
     ggplot() +
     aes(x = credit_risk_score, y = after_stat(count)/sum(after_stat(count)))+
-    geom_histogram(fill = "firebrick4", color = "black", bins = 20)+
+    geom_histogram(fill = "#284B63", color = "black", bins = 20)+
     scale_y_continuous(limits = c(0, 0.2)) +
     scale_x_continuous(limits = c(-200, 400)) +
+    xlab(label = "Score de riesgo crediticio") +
+    ylab(label = "Proporción") +
     ggtitle("No fraude")) +
 (data |> 
     filter(fraud_bool == 1) |> 
     ggplot() +
     aes(x = credit_risk_score, y = after_stat(count)/sum(after_stat(count)))+
-    geom_histogram(fill = "firebrick4", color = "black", bins = 20)+
+    geom_histogram(fill = "#F15946", color = "black", bins = 20)+
     scale_y_continuous(limits = c(0, 0.2)) +
     scale_x_continuous(limits = c(-200, 400)) +
-    ggtitle("Fraude"))
+    xlab(label = "Score de riesgo crediticio") +
+    ylab(label = "Proporción") +
+    ggtitle("Fraude")) + plot_layout(axes = "collect")
 ```
 
 
-Se puede observar que la distribución del score de riesgo para las personas que cometen fraude es simetrica y centrada alrededor de 200, mientras que la distribucion del score de riesgo para las personas que no cometen fraude parece ser más asimétrica y tener una media menor.
+Lla distribución del score de riesgo para las personas que cometen fraude es simétrica y centrada alrededor de 200, mientras que la distribución del score de riesgo para las personas que no cometen fraude parece ser más asimétrica y tener una media menor.
 
 
 
 
 ```{r}
+#| fig-cap: "Proporción de opciones de inicio de sesión según si la transacción es fraudulenta o no"
+
 (data |> 
-    filter(fraud_bool == 0) |> 
-    ggplot() +
-    aes(x = keep_alive_session, y = after_stat(count)/sum(after_stat(count)))+
-    geom_bar(fill = "firebrick4", color = "black")+
-    scale_y_continuous(limits = c(0,1)) +
-    ggtitle("No fraude")) +
-  (data |> 
-     filter(fraud_bool == 1) |> 
-     ggplot() +
-     aes(x = keep_alive_session, y = after_stat(count)/sum(after_stat(count)))+
-     geom_bar(fill = "firebrick4", color = "black")+
-     scale_y_continuous(limits = c(0,1)) +
-     ggtitle("Fraude"))
+   group_by(fraud_bool, keep_alive_session) |> 
+   summarise(prop = n()) |> 
+   mutate(prop = prop/sum(prop)) |> 
+  ggplot() +
+  aes(x = keep_alive_session, y = prop, fill = fraud_bool, group = fraud_bool)+
+  geom_bar(color = "black", position = "dodge", stat = "identity") +
+  xlab(label = "Mantener sesión abierta") +
+  ylab(label = "Proporción") +
+  labs(fill = "Fraude") +
+  scale_fill_manual(values = c("0" = "#284B63", "1" = "#F15946"),labels = c("No","Si")) +
+  scale_x_discrete(labels = c("0" = "No","1" = "Si")) +
+  scale_y_continuous(limits = c(0,1)))
 
 ```
 
 
-No estoy del todo seguro qué es esto
+Por lo general, cuando las transacciones son fraudulentas la persona decide no mantener la sesión abierta en la cuenta del banco en mayor proporción que cuando las transacciones son legítimas.
 

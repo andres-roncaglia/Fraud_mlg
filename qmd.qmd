@@ -39,7 +39,7 @@ knitr::include_graphics("logounr.png")
 \vspace{0.3cm}
 \large
 
-*Un análisis con modelos lineales generalizados*
+*Un análisis mediante modelos lineales generalizados*
 
 \vspace{9cm}
 
@@ -47,7 +47,7 @@ knitr::include_graphics("logounr.png")
 
 **Autores: Franco Santini - Nicolas Gamboa - Andrés Roncaglia**
 
-**Docentes: Boggio Gabriela - Harvey Guillermina - Costa Vicotorio**
+**Docentes: Boggio Gabriela - Harvey Guillermina - Costa Victorio**
 
 **2024**
 \normalsize
@@ -220,7 +220,7 @@ Se puede observar que las personas que cometieron fraude tienden a tener un ingr
   aes(x = name_email_similarity, y = ..density..)+
   geom_histogram(bins = 15, color = "black", fill = "#284B63") +
   scale_y_continuous(limits = c(0,2.25)) +
-  xlab(label = "Simililaridad nombre-email") +
+  xlab(label = "Similitud nombre-email") +
   ylab(label = "Proporción") +
   ggtitle("No fraude")) +
 (data |> 
@@ -229,7 +229,7 @@ Se puede observar que las personas que cometieron fraude tienden a tener un ingr
   aes(x = name_email_similarity, y = ..density..)+
   geom_histogram(bins = 15, color = "black", fill = "#F15946") +
   scale_y_continuous(limits = c(0,2.25)) +
-  xlab(label = "Simililaridad nombre-email") +
+  xlab(label = "Similitud nombre-email") +
   ylab(label = "Proporción") +
   ggtitle("Fraude")) + plot_layout(axes = "collect")
 ```

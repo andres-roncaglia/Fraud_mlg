@@ -217,7 +217,7 @@ Se puede observar que las personas que cometieron fraude tienden a tener un ingr
 (data |> 
   filter(fraud_bool == 0) |> 
   ggplot() +
-  aes(x = name_email_similarity, y = ..density..)+
+  aes(x = name_email_similarity, y = after_stat(density))+
   geom_histogram(bins = 15, color = "black", fill = "#284B63") +
   scale_y_continuous(limits = c(0,2.25)) +
   xlab(label = "Similitud nombre-email") +
@@ -226,7 +226,7 @@ Se puede observar que las personas que cometieron fraude tienden a tener un ingr
 (data |> 
   filter(fraud_bool == 1) |> 
   ggplot() +
-  aes(x = name_email_similarity, y = ..density..)+
+  aes(x = name_email_similarity, y = after_stat(density))+
   geom_histogram(bins = 15, color = "black", fill = "#F15946") +
   scale_y_continuous(limits = c(0,2.25)) +
   xlab(label = "Similitud nombre-email") +
@@ -244,7 +244,7 @@ Las transacciones realizadas con emails no muy similares al nombre real de la pe
 (data |> 
   filter(fraud_bool == 0) |> 
   ggplot() +
-  aes(x = payment_type, y = (..count..)/sum(..count..))+
+  aes(x = payment_type, y = (after_stat(count))/sum(after_stat(count)))+
   geom_bar(color = "black", fill = "#284B63") +
   xlab(label = "Tipo del plan de pago") +
   ylab(label = "Proporción") +
@@ -253,7 +253,7 @@ Las transacciones realizadas con emails no muy similares al nombre real de la pe
 (data |> 
   filter(fraud_bool == 1) |> 
   ggplot() +
-  aes(x = payment_type, y = (..count..)/sum(..count..))+
+  aes(x = payment_type, y = (after_stat(count))/sum(after_stat(count)))+
   geom_bar(color = "black", fill = "#F15946") +
   xlab(label = "Tipo del plan de pago") +
   ylab(label = "Proporción") +

@@ -179,8 +179,28 @@ data <- data |>
     phone_home_valid = factor(phone_home_valid),
     phone_mobile_valid = factor(phone_mobile_valid),
     email_is_free = factor(email_is_free),
-    keep_alive_session = factor(keep_alive_session)
-  )
+    keep_alive_session = factor(keep_alive_session),
+    current_address_months_count = case_when(current_address_months_count == -1 ~ NA,
+                                              T ~ current_address_months_count),
+    bank_months_count = case_when(bank_months_count == -1 ~ NA,
+                                              T ~ bank_months_count),
+    session_length_in_minutes = case_when(session_length_in_minutes == -1 ~ NA,
+                                              T ~ session_length_in_minutes)
+  ) |> 
+  select(-prev_address_months_count,
+         -zip_count_4w,
+         -velocity_6h,
+         -velocity_4w,
+         -days_since_request,
+         -intended_balcon_amount,
+         -device_fraud_count,
+         -X,
+         -bank_branch_count_8w,
+         -date_of_birth_distinct_emails_4w)
+
+model <- glm(fraud_bool ~ ., data = data, family = binomial(link = "logit"), na.action = na.omit)
+
+step(model, direction = "both")
 ```
 
 

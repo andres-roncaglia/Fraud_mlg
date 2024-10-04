@@ -143,6 +143,11 @@ library(ggplot2)
 library(dplyr)
 library(tidyr)
 library(patchwork)
+library(glmtoolbox)
+library(statmod)
+library(pROC)
+library(ggforce)
+library(caret)
 
 theme_set(theme_bw() + 
             theme(plot.title = element_text(hjust = 0.5),
@@ -154,7 +159,7 @@ knitr::opts_chunk$set(fig.align = "center")
 
 
 ```{r}
-data <- read.csv("Data/Base_resumida.csv") |> 
+data_og <- read.csv("Data/Base_resumida.csv") |> 
   mutate(
     income = factor(income),
     proposed_credit_limit_cat = case_when(proposed_credit_limit == 190 ~ 200,
@@ -170,7 +175,7 @@ data <- read.csv("Data/Base_resumida.csv") |>
                                           proposed_credit_limit == 2000 ~ 2000,
                                           T ~ 2000))
 
-data <- data |> 
+data_og <- data_og |> 
   mutate(
     fraud_bool = factor(fraud_bool),
     proposed_credit_limit_cat = factor(proposed_credit_limit_cat),
@@ -194,13 +199,62 @@ data <- data |>
          -days_since_request,
          -intended_balcon_amount,
          -device_fraud_count,
-         -X,
          -bank_branch_count_8w,
          -date_of_birth_distinct_emails_4w)
 
-model <- glm(fraud_bool ~ ., data = data, family = binomial(link = "logit"), na.action = na.omit)
 
-step(model, direction = "both")
+# Creacion de muestra mas chica -----------------
+set.seed(2024)
+
+data_og <- drop_na(data = data_og)
+
+fraude <- data_og |> filter(fraud_bool == 1)
+fraude$n <- 1:nrow(fraude)
+
+no_fraude <- data_og |> filter(fraud_bool == 0)
+no_fraude$n <- 1:nrow(no_fraude)
+
+proporcion <- sample(seq(0.1, 0.4, by = 0.05), size = 1)
+n <- sample(400:700, size = 1)
+
+sel_fraude <- sample(x = fraude$n, size = n*proporcion, replace = F)
+sel_nofraude <- sample(x = no_fraude$n, size = n-(n*proporcion), replace = F)
+
+fraude <- fraude[sel_fraude,]
+no_fraude <- no_fraude[sel_nofraude,]
+
+data <- rbind(fraude, no_fraude)
+
+
+# Creacion datos de testeo -----------------
+
+data_resto <- filter(data_og, !(X %in% data$X))
+
+fraude <- data_resto |> filter(fraud_bool == 1)
+fraude$n <- 1:nrow(fraude)
+
+no_fraude <- data_resto |> filter(fraud_bool == 0)
+no_fraude$n <- 1:nrow(no_fraude)
+
+proporcion <- sample(seq(0.1, 0.4, by = 0.05), size = 1)
+n <- floor(n*0.7)
+
+sel_fraude <- sample(x = fraude$n, size = n*proporcion, replace = F)
+sel_nofraude <- sample(x = no_fraude$n, size = n-(n*proporcion), replace = F)
+
+fraude <- fraude[sel_fraude,]
+no_fraude <- no_fraude[sel_nofraude,]
+
+data_test <- rbind(fraude, no_fraude)
+
+
+data_test <- data_test |> select(-n, -proposed_credit_limit, -X)
+
+
+
+# Saco variables inutiles
+data <- data |> select(-n, -proposed_credit_limit, -X)
+
 ```
 
 
@@ -215,7 +269,7 @@ step(model, direction = "both")
   geom_bar(color = "black", fill = "#284B63") +
   xlab(label = "Ingreso anual") +
   ylab(label = "Proporción") +
-  scale_y_continuous(limits = c(0,0.45)) +
+  scale_y_continuous(limits = c(0,0.8)) +
   ggtitle("No fraude")) +
 (data |> 
    filter(fraud_bool == 1) |> 
@@ -224,7 +278,7 @@ step(model, direction = "both")
    geom_bar(color = "black", fill = "#F15946") +
    xlab(label = "Ingreso anual") +
    ylab(label = "Proporción") +
-   scale_y_continuous(limits = c(0,0.45)) +
+   scale_y_continuous(limits = c(0,0.8)) +
    ggtitle("Fraude"))) + plot_layout(axes = "collect")
 ```
 
@@ -239,7 +293,7 @@ Se puede observar que las personas que cometieron fraude tienden a tener un ingr
   ggplot() +
   aes(x = name_email_similarity, y = after_stat(density))+
   geom_histogram(bins = 15, color = "black", fill = "#284B63") +
-  scale_y_continuous(limits = c(0,2.25)) +
+  scale_y_continuous(limits = c(0,5)) +
   xlab(label = "Similitud nombre-email") +
   ylab(label = "Proporción") +
   ggtitle("No fraude")) +
@@ -248,7 +302,7 @@ Se puede observar que las personas que cometieron fraude tienden a tener un ingr
   ggplot() +
   aes(x = name_email_similarity, y = after_stat(density))+
   geom_histogram(bins = 15, color = "black", fill = "#F15946") +
-  scale_y_continuous(limits = c(0,2.25)) +
+  scale_y_continuous(limits = c(0,5)) +
   xlab(label = "Similitud nombre-email") +
   ylab(label = "Proporción") +
   ggtitle("Fraude")) + plot_layout(axes = "collect")
@@ -268,7 +322,7 @@ Las transacciones realizadas con emails no muy similares al nombre real de la pe
   geom_bar(color = "black", fill = "#284B63") +
   xlab(label = "Tipo del plan de pago") +
   ylab(label = "Proporción") +
-  scale_y_continuous(limits = c(0,0.4)) +
+  scale_y_continuous(limits = c(0,0.8)) +
   ggtitle("No fraude")) +
 (data |> 
   filter(fraud_bool == 1) |> 
@@ -277,7 +331,7 @@ Las transacciones realizadas con emails no muy similares al nombre real de la pe
   geom_bar(color = "black", fill = "#F15946") +
   xlab(label = "Tipo del plan de pago") +
   ylab(label = "Proporción") +
-  scale_y_continuous(limits = c(0,0.4)) +
+  scale_y_continuous(limits = c(0,0.8)) +
   ggtitle("Fraude")) + plot_layout(axes = "collect")
 ```
 
@@ -401,7 +455,7 @@ También se puede destacar que las operaciones fraudulentas parecen ser más com
 ```
 
 
-Lla distribución del score de riesgo para las personas que cometen fraude es simétrica y centrada alrededor de 200, mientras que la distribución del score de riesgo para las personas que no cometen fraude parece ser más asimétrica y tener una media menor.
+La distribución del score de riesgo para las personas que cometen fraude es simétrica y centrada alrededor de 200, mientras que la distribución del score de riesgo para las personas que no cometen fraude parece ser más asimétrica y tener una media menor.
 
 
 
@@ -427,4 +481,242 @@ Lla distribución del score de riesgo para las personas que cometen fraude es si
 
 
 Por lo general, cuando las transacciones son fraudulentas la persona decide no mantener la sesión abierta en la cuenta del banco en mayor proporción que cuando las transacciones son legítimas.
+
+# Modelado
+
+Teniendo todo esto en cuenta buscamos un modelo que ajuste bien a nuestros datos, para esto primero realizamos una seleccion de variables paso a paso, obteniendo el siguiente modelo:
+
+```{r}
+
+# Modelado ---------------------
+
+model <- glm(fraud_bool ~ ., data = data, family = binomial(link = "logit"), na.action = na.omit)
+
+step(model, direction = "both", 
+     trace=0)
+
+modelo_logit <- glm(fraud_bool ~ income + housing_status + 
+    phone_home_valid + phone_mobile_valid + has_other_cards + 
+    proposed_credit_limit_cat + device_os + device_distinct_emails_8w, 
+    data = data, 
+    family = binomial(link = "logit"), 
+    na.action = na.omit)
+
+summary(modelo_logit)
+```
+
+$Logit(\pi_i) = \beta_0 $
+
+Se procede a comprobar el enlace:
+
+
+```{r}
+data_enlaces <- data
+
+# Comprobacion enlace logit --------------------
+pred.logit<-predict(modelo_logit)
+data_enlaces$pred.2.logit <- pred.logit*pred.logit
+
+modelo_logit.2 <- glm(fraud_bool ~ income + housing_status + 
+    phone_home_valid + phone_mobile_valid + has_other_cards + 
+    proposed_credit_limit_cat + device_os + device_distinct_emails_8w + pred.2.logit,
+    data = data_enlaces,
+    family = binomial(link = "logit"),
+    na.action = na.omit)
+
+
+anova(modelo_logit, modelo_logit.2, test="LRT") 
+# Este enlace es apropiado
+
+# Comprobacion enlace probit --------------------
+modelo_probit <- glm(fraud_bool ~ income + housing_status + 
+    phone_home_valid + phone_mobile_valid + has_other_cards + 
+    proposed_credit_limit_cat + device_os + device_distinct_emails_8w, data = data, family = binomial(link = "probit"), na.action = na.omit)
+
+pred.probit <- predict(modelo_probit)
+data_enlaces$pred.2.probit <- pred.probit*pred.probit
+
+modelo_probit.2 <- glm(fraud_bool ~ income + housing_status + 
+    phone_home_valid + phone_mobile_valid + has_other_cards + 
+    proposed_credit_limit_cat + device_os + device_distinct_emails_8w + pred.2.probit,
+    data = data_enlaces,
+    family = binomial(link = "probit"),
+    na.action = na.omit)
+
+anova(modelo_probit, modelo_probit.2, test="LRT") 
+# Este enlace es apropiado
+
+
+# Comprobacion enlace cloglog --------------------
+modelo_cloglog <- glm(fraud_bool ~ income + housing_status + 
+    phone_home_valid + phone_mobile_valid + has_other_cards + 
+    proposed_credit_limit_cat + device_os + device_distinct_emails_8w, data = data, family = binomial(link = "cloglog"), na.action = na.omit)
+
+pred.cloglog <- predict(modelo_cloglog)
+data_enlaces$pred.2.cloglog <- pred.cloglog*pred.cloglog
+
+modelo_cloglog.2 <- glm(fraud_bool ~ income + housing_status + 
+    phone_home_valid + phone_mobile_valid + has_other_cards + 
+    proposed_credit_limit_cat + device_os + device_distinct_emails_8w + pred.2.cloglog,
+    data = data_enlaces,
+    family = binomial(link = "cloglog"),
+    na.action = na.omit)
+
+anova(modelo_cloglog, modelo_cloglog.2, test="LRT") 
+# Este enlace es apropiado
+
+```
+
+Los tres enlaces son apropiados, por lo tanto nos quedamos con el enlace logit por su facilidad en la interpretación.
+
+```{r}
+hltest(modelo_logit)
+```
+
+## Analisis de residuos
+
+### Evaluación de la componente sistemática
+
+
+```{r}
+# Residuos cuantil
+rQ.logit <- qresid(modelo_logit)
+
+# Mu estimado
+mu_logit <- fitted(modelo_logit)
+
+### Gráfico de residuos cuantil vs. probabilidades estimadas (ajuste logit)
+G1 <- ggplot(data_enlaces, aes(y = rQ.logit, x = fitted(modelo_probit))) + 
+  geom_point(fill = "orange", shape = 21, size = 3, alpha = 0.4) +
+  geom_hline(yintercept = 0) + ylim(-3, 3) + 
+  geom_hline(yintercept = -3, linetype = "dashed") + 
+  geom_hline(yintercept =  3, linetype = "dashed") +
+  labs(title = "Gráfico de residuos cuantil vs. las probabilidades estimadas", x = expression(hat(pi)), y = "Residuos cuantil") +
+  theme_minimal()
+
+### Gráfico de residuos cuantil vs. la media estimada (ajuste logit)
+G2 <- ggplot(data_enlaces, aes(y = rQ.logit, x = mu_logit)) + 
+  geom_point(fill = "orange", shape = 21, size = 3, alpha = 0.4) +
+  geom_hline(yintercept = 0) + ylim(-3, 3) + 
+  geom_hline(yintercept = -3, linetype = "dashed") + 
+  geom_hline(yintercept =  3, linetype = "dashed") +
+  labs(title = "Gráfico de residuos cuantil vs. las medias estimadas", x = expression(hat(mu)), y = "Residuos cuantil") +
+  theme_minimal()
+
+G1+G2
+```
+
+Dado que no se ve ningún patrón y ningun punto se escapa de las bandas se puede decir que la componente sistematica seleccionada es adecuada.
+
+### Comprobación de la distribución propuesta
+
+```{r}
+
+# Gráfico QQ
+ggplot(data_enlaces, aes(sample = rQ.logit)) +
+  stat_qq(distribution = qnorm, fill = "orange", shape = 21, size = 3, alpha = 0.4) +
+  stat_qq_line() +
+  annotate(geom = "label", label = paste("Test de Normalidad Shapiro-Wilks\n p-value:", round(shapiro.test(rQ.logit)$p.value, 2)), x = 0.9, y = -1.5, fill = "lightblue1") +
+  labs(title = "Gráfico probabilístico normal con residuos cuantil",  x = "Cuantiles teóricos", y = "Cuantiles de los residuos cuantil") +
+  theme_minimal()
+
+
+```
+
+Viendo el gráfico y el test de Shapiro-Wilks para la normalidad de los errores, se puede concluir que la elección de la distribución de la variable es correcta.
+
+
+# Interpretaciones
+
+
+```{r, eval=FALSE}
+
+exp(modelo_logit$coefficients["has_other_cards1"])
+
+exp(modelo_logit$coefficients["phone_home_valid1"])
+
+exp(modelo_logit$coefficients["proposed_credit_limit_cat2000"])
+
+```
+
+La chance de que un cliente comita fraude dado que tiene otra tarjeta en el mismo banco es un 68% menor que un cliente que no tiene, cuando el resto de las variables permanecen constantes.
+
+Del mismo modo, un cliente que proporciono un telefono fijo válido tiene una chance de cometer fraude un 71% menor que uno que proporciono uno no válido, cuando el resto de las variables permanecen constantes.
+
+A medida que el crédito límite propuesto aumenta en mil unidades monetarias, la chance de que un cliente cometa fraude aumenta un 191%, manteniendo el resto de variables fijas. VARIFICAR SI ES LINEAL O NO
+
+Las características de las personas más propensas a cometer fraude (con una probabilidad estimada del 99% aproximadamente) son:
+
+- Ingreso en el decil más alto
+
+- El estado residencial del aplicante es "BA"
+
+- El número de teléfono fijo proporcionado no es válido
+
+- El número de celular proporcionado no es válido
+
+- No tiene otra tarjeta en el mismo banco
+
+- El límite del crédito propuesto fue 2000 euros
+
+- El sistema operativo usado fue macOS
+
+- Se registraron 2 emails distintos en la página del banco desde el mismo dispositivo, en las últimas 8 semanas
+
+
+Las características de las personas menos propensas a cometer fraude (con una probabilidad estimada de aproximadamente 0%) son:
+
+- Ingreso en el segundo decil
+
+- El estado residencial del aplicante es "BD"
+
+- El número de teléfono fijo proporcionado es válido
+
+- El número de celular proporcionado es válido
+
+- Tiene otra tarjeta en el mismo banco
+
+- El límite del crédito propuesto fue 500 euros
+
+- El sistema operativo usado fue X11
+
+- Se registró un solo email en la página del banco desde dispositivo utilizado, en las últimas 8 semanas
+
+# Capacidad predictiva
+
+```{r}
+curva_roc_knn <- roc(response = data$fraud_bool, predictor = fitted(modelo_logit), plot = F)
+
+best_knn <- coords(curva_roc_knn, "local maximas")[7,]
+
+data.frame(especificidad = curva_roc_knn$specificities,
+           sensibilidad = curva_roc_knn$sensitivities,
+           punto_corte = curva_roc_knn$thresholds
+           ) |> 
+  arrange(especificidad, sensibilidad) |> 
+  ggplot() +
+  geom_line(aes(x = especificidad, y = sensibilidad)) +
+  scale_x_reverse() +
+  geom_segment(x = -1, xend=0, y = 0, yend = 1) +
+  annotate(x = 0.45, y = 0.75, geom = "text", label = paste("AUC =", round(curva_roc_knn$auc, digits = 4))) +
+  geom_mark_ellipse(
+    aes(x = best_knn$specificity, y = best_knn$sensitivity,
+      label = format(round(as.numeric(best_knn$threshold), digits = 6), scientific = F),
+      description = "Punto de corte"), 
+    color = "red", 
+    expand = 0.01) + 
+  labs(x = "Especificidad", y = "Sensibilidad")
+
+```
+
+Se decidió utilizar el mejor punto de corte que maximice la especificidad garantizando una sensibilidad de al menos un 90%, esto para evitar el máximo número de fraudes posibles sin afectar a los clientes legítimos.
+
+
+```{r}
+prob_pred <- exp(predict(modelo_logit, newdata = data_test))/(1+exp(predict(modelo_logit, newdata = data_test)))
+
+fraud_pred <- factor(ifelse(prob_pred >= best_knn$threshold, 1, 0), levels = c(0,1))
+
+confusionMatrix(fraud_pred, reference = data_test$fraud_bool, positive = "1")
+```
 

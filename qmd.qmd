@@ -33,7 +33,7 @@ knitr::include_graphics("logounr.png")
 \vspace{1cm}
 
 \Large
-**DETECCIÓN DE FRAUDE**
+**Guardianes de la galaxia financiera**
 
 
 \vspace{0.3cm}
@@ -570,13 +570,51 @@ summary(modelo_logit)
 
 # Prueba de interacciones dobles de interés
 
+modelo_logit_1 <- glm(fraud_bool ~ income + housing_status +
+    phone_home_valid + phone_mobile_valid + has_other_cards +
+    proposed_credit_limit + device_os + device_distinct_emails_8w + income:has_other_cards,
+    data = data,
+    family = binomial(link = "logit"),
+    na.action = na.omit)
+
+# summary(modelo_logit_1)
+anova(modelo_logit, modelo_logit_1)
+pchisq(3.9032, 1, lower.tail = F)
+
+
+modelo_logit_2 <- glm(fraud_bool ~ income + housing_status + 
+    phone_home_valid + phone_mobile_valid + has_other_cards + 
+    proposed_credit_limit + device_os + device_distinct_emails_8w + income:phone_mobile_valid, 
+    data = data, 
+    family = binomial(link = "logit"), 
+    na.action = na.omit)
+
+anova(modelo_logit, modelo_logit_2)
+
+
+
+modelo_logit_3 <- glm(fraud_bool ~ income + housing_status + 
+    phone_home_valid + phone_mobile_valid + has_other_cards + 
+    proposed_credit_limit + device_os + device_distinct_emails_8w + income:phone_mobile_valid + has_other_cards:phone_mobile_valid, 
+    data = data, 
+    family = binomial(link = "logit"), 
+    na.action = na.omit)
+
+anova(modelo_logit_2, modelo_logit_3)
+
 
 ```
 
 
+$$
+logit(\pi_i) = \beta_0 + \beta_I\cdot I_i + \beta_{H1}\cdot H_{1i} + \beta_{H2}\cdot H_{2i} + \beta_{H3}\cdot H_{3i} + \beta_{H4}\cdot H_{4i} + \beta_{H5}\cdot H_{5i} + \beta_{Ph}\cdot Ph_i + \beta_{Pm}\cdot Pm_i + \beta_C\cdot C_i + \beta_L\cdot L_i + \beta_D\cdot D_i + \beta_E\cdot E_i + \beta_{IPm}\cdot I_i\cdot Pm_i + \beta_{CPm}\cdot C_i\cdot Pm_i 
+$$
 
 
-$Logit(\pi_i) = \beta_0 $
+
+
+
+
 
 Se procede a comprobar el enlace:
 
@@ -585,31 +623,31 @@ Se procede a comprobar el enlace:
 data_enlaces <- data
 
 # Comprobacion enlace logit --------------------
-pred.logit<-predict(modelo_logit)
+pred.logit<-predict(modelo_logit_3)
 data_enlaces$pred.2.logit <- pred.logit*pred.logit
 
 modelo_logit.2 <- glm(fraud_bool ~ income + housing_status + 
     phone_home_valid + phone_mobile_valid + has_other_cards + 
-    proposed_credit_limit + device_os + device_distinct_emails_8w + pred.2.logit,
+    proposed_credit_limit + device_os + device_distinct_emails_8w + income:phone_mobile_valid + has_other_cards:phone_mobile_valid + pred.2.logit,
     data = data_enlaces,
     family = binomial(link = "logit"),
     na.action = na.omit)
 
 
-anova(modelo_logit, modelo_logit.2, test="LRT") 
+anova(modelo_logit_3, modelo_logit.2, test="LRT") 
 # Este enlace es apropiado
 
 # Comprobacion enlace probit --------------------
 modelo_probit <- glm(fraud_bool ~ income + housing_status + 
     phone_home_valid + phone_mobile_valid + has_other_cards + 
-    proposed_credit_limit + device_os + device_distinct_emails_8w, data = data, family = binomial(link = "probit"), na.action = na.omit)
+    proposed_credit_limit + device_os + device_distinct_emails_8w + income:phone_mobile_valid + has_other_cards:phone_mobile_valid, data = data, family = binomial(link = "probit"), na.action = na.omit)
 
 pred.probit <- predict(modelo_probit)
 data_enlaces$pred.2.probit <- pred.probit*pred.probit
 
 modelo_probit.2 <- glm(fraud_bool ~ income + housing_status + 
     phone_home_valid + phone_mobile_valid + has_other_cards + 
-    proposed_credit_limit + device_os + device_distinct_emails_8w + pred.2.probit,
+    proposed_credit_limit + device_os + device_distinct_emails_8w + income:phone_mobile_valid + has_other_cards:phone_mobile_valid + pred.2.probit,
     data = data_enlaces,
     family = binomial(link = "probit"),
     na.action = na.omit)
@@ -621,14 +659,14 @@ anova(modelo_probit, modelo_probit.2, test="LRT")
 # Comprobacion enlace cloglog --------------------
 modelo_cloglog <- glm(fraud_bool ~ income + housing_status + 
     phone_home_valid + phone_mobile_valid + has_other_cards + 
-    proposed_credit_limit + device_os + device_distinct_emails_8w, data = data, family = binomial(link = "cloglog"), na.action = na.omit)
+    proposed_credit_limit + device_os + device_distinct_emails_8w + income:phone_mobile_valid + has_other_cards:phone_mobile_valid, data = data, family = binomial(link = "cloglog"), na.action = na.omit)
 
 pred.cloglog <- predict(modelo_cloglog)
 data_enlaces$pred.2.cloglog <- pred.cloglog*pred.cloglog
 
 modelo_cloglog.2 <- glm(fraud_bool ~ income + housing_status + 
     phone_home_valid + phone_mobile_valid + has_other_cards + 
-    proposed_credit_limit + device_os + device_distinct_emails_8w + pred.2.cloglog,
+    proposed_credit_limit + device_os + device_distinct_emails_8w + income:phone_mobile_valid + has_other_cards:phone_mobile_valid +  pred.2.cloglog,
     data = data_enlaces,
     family = binomial(link = "cloglog"),
     na.action = na.omit)
@@ -641,8 +679,39 @@ anova(modelo_cloglog, modelo_cloglog.2, test="LRT")
 Los tres enlaces son apropiados, por lo tanto nos quedamos con el enlace logit por su facilidad en la interpretación.
 
 ```{r}
-hltest(modelo_logit)
+hltest(modelo_logit_3)
 ```
+
+### Modelo estimado
+$$
+logit(\pi_i) = \hat\beta_0 + \hat\beta_I\cdot I_i + \hat\beta_{H1}\cdot H_{1i} + \hat\beta_{H2}\cdot H_{2i} + \hat\beta_{H3}\cdot H_{3i} + \hat\beta_{H4}\cdot H_{4i} + \hat\beta_{H5}\cdot H_{5i} + \hat\beta_{Ph}\cdot Ph_i + \hat\beta_{Pm}\cdot Pm_i + \hat\beta_C\cdot C_i + \hat\beta_L\cdot L_i + \hat\beta_{D1}\cdot D_{1i} + \hat\beta_{D2}\cdot D_{2i} + \hat\beta_{D3}\cdot D_{3i} + \hat\beta_{D4}\cdot D_{4i} + \hat\beta_E\cdot E_i + \hat\beta_{IPm}\cdot I_i\cdot Pm_i + \hat\beta_{CPm}\cdot C_i\cdot Pm_i 
+$$
+
+<!-- ### Interpretacion de los coeficientes del modelo -->
+
+<!-- -   $\beta_0$: La log chance de que el cliente cometa fraude cuando las variables cuantitativas valen 0, y las cualitativas se ubican en su categoría de referencia. -->
+<!-- -   $\beta_I$: El cambio esperado en la log chance por aumento unitario de la variable ingreso. -->
+-   $\hat\beta_{0}=-10.48$
+-   $\hat\beta_{I}=8.03$
+-   $\hat\beta_{H1}=-1.05$
+-   $\hat\beta_{H2}=-1.62$
+-   $\hat\beta_{H3}=-17.52$
+-   $\hat\beta_{H4}=-2.5$
+-   $\hat\beta_{H5}=-17.16$
+-   $\hat\beta_{Ph}=-1.31$
+-   $\hat\beta_{Pm}=3.21$
+-   $\hat\beta_{C}=-18.56$
+-   $\hat\beta_{L}=0.001$
+-   $\hat\beta_{D1}=1.15$
+-   $\hat\beta_{D2}=-1.02$
+-   $\hat\beta_{D3}=0.75$
+-   $\hat\beta_{D4}=-16.42$
+-   $\hat\beta_{E}=4.55$
+-   $\hat\beta_{IPm}=-5.99$
+-   $\hat\beta_{CPm}=17.84$
+
+
+
 
 ## Analisis de residuos
 
@@ -651,15 +720,16 @@ hltest(modelo_logit)
 
 ```{r}
 # Residuos cuantil
-rQ.logit <- qresid(modelo_logit)
+rQ.logit <- qresid(modelo_logit_3)
 
 # Mu estimado
-mu_logit <- fitted(modelo_logit)
+mu_logit <- fitted(modelo_logit_3)
 
 ### Gráfico de residuos cuantil vs. probabilidades estimadas (ajuste logit)
 G1 <- ggplot(data_enlaces, aes(y = rQ.logit, x = fitted(modelo_probit))) + 
   geom_point(fill = "orange", shape = 21, size = 3, alpha = 0.4) +
-  geom_hline(yintercept = 0) + ylim(-3, 3) + 
+  geom_hline(yintercept = 0) + 
+  # ylim(-3, 3) + 
   geom_hline(yintercept = -3, linetype = "dashed") + 
   geom_hline(yintercept =  3, linetype = "dashed") +
   labs(title = "Gráfico de residuos cuantil vs. las probabilidades estimadas", x = expression(hat(pi)), y = "Residuos cuantil") +
@@ -668,7 +738,8 @@ G1 <- ggplot(data_enlaces, aes(y = rQ.logit, x = fitted(modelo_probit))) +
 ### Gráfico de residuos cuantil vs. la media estimada (ajuste logit)
 G2 <- ggplot(data_enlaces, aes(y = rQ.logit, x = mu_logit)) + 
   geom_point(fill = "orange", shape = 21, size = 3, alpha = 0.4) +
-  geom_hline(yintercept = 0) + ylim(-3, 3) + 
+  geom_hline(yintercept = 0) + 
+  # ylim(-3, 3) + 
   geom_hline(yintercept = -3, linetype = "dashed") + 
   geom_hline(yintercept =  3, linetype = "dashed") +
   labs(title = "Gráfico de residuos cuantil vs. las medias estimadas", x = expression(hat(mu)), y = "Residuos cuantil") +
@@ -702,11 +773,11 @@ Viendo el gráfico y el test de Shapiro-Wilks para la normalidad de los errores,
 
 ```{r, eval=FALSE}
 
-exp(modelo_logit$coefficients["has_other_cards1"])
+exp(modelo_logit_3$coefficients["has_other_cards1"])
 
-exp(modelo_logit$coefficients["phone_home_valid1"])
+exp(modelo_logit_3$coefficients["phone_home_valid1"])
 
-exp(modelo_logit$coefficients["proposed_credit_limit2000"])
+exp(modelo_logit_3$coefficients["proposed_credit_limit2000"])
 
 ```
 
@@ -753,10 +824,40 @@ Las características de las personas menos propensas a cometer fraude (con una p
 
 - Se registró un solo email en la página del banco desde dispositivo utilizado, en las últimas 8 semanas
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 # Capacidad predictiva
 
 ```{r}
-curva_roc_knn <- roc(response = data$fraud_bool, predictor = fitted(modelo_logit), plot = F)
+curva_roc_knn <- roc(response = data$fraud_bool, predictor = fitted(modelo_logit_3), plot = F)
 
 best_knn <- coords(curva_roc_knn, "local maximas")[7,]
 
@@ -797,15 +898,25 @@ data_test <- data_test |>
   )
 
 
-prob_pred <- exp(predict(modelo_logit, newdata = data_test))/(1+exp(predict(modelo_logit, newdata = data_test)))
+prob_pred <- exp(predict(modelo_logit_3, newdata = data_test))/(1+exp(predict(modelo_logit_3, newdata = data_test)))
 
 fraud_pred <- factor(ifelse(prob_pred >= best_knn$threshold, 1, 0), levels = c(0,1))
 
 confusionMatrix(fraud_pred, reference = data_test$fraud_bool, positive = "1")
 ```
 
+
 ```{r}
 
+curva_roc_knn <- roc(response = data$fraud_bool, predictor = fitted(modelo_logit), plot = F)
+
+best_knn <- coords(curva_roc_knn, "local maximas")[7,]
+
+prob_pred <- exp(predict(modelo_logit, newdata = data_test))/(1+exp(predict(modelo_logit, newdata = data_test)))
+
+fraud_pred <- factor(ifelse(prob_pred >= best_knn$threshold, 1, 0), levels = c(0,1))
+
+confusionMatrix(fraud_pred, reference = data_test$fraud_bool, positive = "1")
 ```
 
 

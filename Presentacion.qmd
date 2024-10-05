@@ -2,6 +2,7 @@
 title: "Modelos lineales generalizados para la detección de fraude en bancos"
 format: 
   revealjs:
+    theme: dark
     slide-number: true
     logo: unr.png
 author: "Gamboa Nicolás - Roncaglia Andrés - Santini Franco"

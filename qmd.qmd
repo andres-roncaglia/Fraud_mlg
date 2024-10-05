@@ -505,6 +505,77 @@ modelo_logit <- glm(fraud_bool ~ income + housing_status +
 summary(modelo_logit)
 ```
 
+```{r}
+
+# Linealidad de las variables ordinales 
+
+data <- data |> 
+  mutate(
+    income_ord = as.numeric(income),
+    proposed_credit_limit_cat_ord = as.numeric(proposed_credit_limit_cat)
+  )
+
+model_income_ord <- glm(fraud_bool ~ income_ord + housing_status + 
+    phone_home_valid + phone_mobile_valid + has_other_cards + 
+    proposed_credit_limit_cat + device_os + device_distinct_emails_8w, 
+    data = data, 
+    family = binomial(link = "logit"), 
+    na.action = na.omit)
+
+
+linealidad <- anova(model_income_ord, modelo_logit)
+
+pchisq(8.2587, 7,lower.tail = F)
+
+# No rechazo H0 por lo que la variable ingreso es lineal
+
+model_cardlimit_ord <- glm(fraud_bool ~ income + housing_status + 
+    phone_home_valid + phone_mobile_valid + has_other_cards + 
+    proposed_credit_limit_cat_ord + device_os + device_distinct_emails_8w, 
+    data = data, 
+    family = binomial(link = "logit"), 
+    na.action = na.omit)
+
+linealidad <- anova(model_cardlimit_ord, modelo_logit)
+
+pchisq(4.8266, 3,lower.tail = F)
+
+# No se rechaza h0 por lo que la variable es lineaaaaal
+
+data <- data |> 
+  mutate(
+    income = income_ord/10,
+    proposed_credit_limit = case_when(proposed_credit_limit_cat_ord == 1 ~ 200,
+                                          proposed_credit_limit_cat_ord == 2 ~ 500,
+                                          proposed_credit_limit_cat_ord == 3 ~ 1000,
+                                          proposed_credit_limit_cat_ord == 4 ~ 1500,
+                                          T ~ 2000)
+  )
+```
+
+```{r}
+# Nuevo modelo ajustado con ls variables ordinales
+
+modelo_logit <- glm(fraud_bool ~ income + housing_status + 
+    phone_home_valid + phone_mobile_valid + has_other_cards + 
+    proposed_credit_limit + device_os + device_distinct_emails_8w, 
+    data = data, 
+    family = binomial(link = "logit"), 
+    na.action = na.omit)
+
+summary(modelo_logit)
+
+```
+```{r}
+
+# Prueba de interacciones dobles de interés
+
+
+```
+
+
+
+
 $Logit(\pi_i) = \beta_0 $
 
 Se procede a comprobar el enlace:
@@ -519,7 +590,7 @@ data_enlaces$pred.2.logit <- pred.logit*pred.logit
 
 modelo_logit.2 <- glm(fraud_bool ~ income + housing_status + 
     phone_home_valid + phone_mobile_valid + has_other_cards + 
-    proposed_credit_limit_cat + device_os + device_distinct_emails_8w + pred.2.logit,
+    proposed_credit_limit + device_os + device_distinct_emails_8w + pred.2.logit,
     data = data_enlaces,
     family = binomial(link = "logit"),
     na.action = na.omit)
@@ -531,14 +602,14 @@ anova(modelo_logit, modelo_logit.2, test="LRT")
 # Comprobacion enlace probit --------------------
 modelo_probit <- glm(fraud_bool ~ income + housing_status + 
     phone_home_valid + phone_mobile_valid + has_other_cards + 
-    proposed_credit_limit_cat + device_os + device_distinct_emails_8w, data = data, family = binomial(link = "probit"), na.action = na.omit)
+    proposed_credit_limit + device_os + device_distinct_emails_8w, data = data, family = binomial(link = "probit"), na.action = na.omit)
 
 pred.probit <- predict(modelo_probit)
 data_enlaces$pred.2.probit <- pred.probit*pred.probit
 
 modelo_probit.2 <- glm(fraud_bool ~ income + housing_status + 
     phone_home_valid + phone_mobile_valid + has_other_cards + 
-    proposed_credit_limit_cat + device_os + device_distinct_emails_8w + pred.2.probit,
+    proposed_credit_limit + device_os + device_distinct_emails_8w + pred.2.probit,
     data = data_enlaces,
     family = binomial(link = "probit"),
     na.action = na.omit)
@@ -550,14 +621,14 @@ anova(modelo_probit, modelo_probit.2, test="LRT")
 # Comprobacion enlace cloglog --------------------
 modelo_cloglog <- glm(fraud_bool ~ income + housing_status + 
     phone_home_valid + phone_mobile_valid + has_other_cards + 
-    proposed_credit_limit_cat + device_os + device_distinct_emails_8w, data = data, family = binomial(link = "cloglog"), na.action = na.omit)
+    proposed_credit_limit + device_os + device_distinct_emails_8w, data = data, family = binomial(link = "cloglog"), na.action = na.omit)
 
 pred.cloglog <- predict(modelo_cloglog)
 data_enlaces$pred.2.cloglog <- pred.cloglog*pred.cloglog
 
 modelo_cloglog.2 <- glm(fraud_bool ~ income + housing_status + 
     phone_home_valid + phone_mobile_valid + has_other_cards + 
-    proposed_credit_limit_cat + device_os + device_distinct_emails_8w + pred.2.cloglog,
+    proposed_credit_limit + device_os + device_distinct_emails_8w + pred.2.cloglog,
     data = data_enlaces,
     family = binomial(link = "cloglog"),
     na.action = na.omit)
@@ -635,7 +706,7 @@ exp(modelo_logit$coefficients["has_other_cards1"])
 
 exp(modelo_logit$coefficients["phone_home_valid1"])
 
-exp(modelo_logit$coefficients["proposed_credit_limit_cat2000"])
+exp(modelo_logit$coefficients["proposed_credit_limit2000"])
 
 ```
 
@@ -692,7 +763,7 @@ best_knn <- coords(curva_roc_knn, "local maximas")[7,]
 data.frame(especificidad = curva_roc_knn$specificities,
            sensibilidad = curva_roc_knn$sensitivities,
            punto_corte = curva_roc_knn$thresholds
-           ) |> 
+          ) |> 
   arrange(especificidad, sensibilidad) |> 
   ggplot() +
   geom_line(aes(x = especificidad, y = sensibilidad)) +
@@ -713,10 +784,28 @@ Se decidió utilizar el mejor punto de corte que maximice la especificidad garan
 
 
 ```{r}
+
+# Agrego las ordinales
+data_test <- data_test |> 
+  mutate(
+    income = as.numeric(income)/10,
+    proposed_credit_limit = case_when(as.numeric(proposed_credit_limit_cat) == 1 ~ 200,
+                                          as.numeric(proposed_credit_limit_cat) == 2 ~ 500,
+                                          as.numeric(proposed_credit_limit_cat) == 3 ~ 1000,
+                                          as.numeric(proposed_credit_limit_cat) == 4 ~ 1500,
+                                          T ~ 2000)
+  )
+
+
 prob_pred <- exp(predict(modelo_logit, newdata = data_test))/(1+exp(predict(modelo_logit, newdata = data_test)))
 
 fraud_pred <- factor(ifelse(prob_pred >= best_knn$threshold, 1, 0), levels = c(0,1))
 
 confusionMatrix(fraud_pred, reference = data_test$fraud_bool, positive = "1")
 ```
+
+```{r}
+
+```
+
 

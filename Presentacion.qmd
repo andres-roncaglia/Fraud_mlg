@@ -4,7 +4,7 @@ format:
   revealjs:
     theme: dark
     slide-number: true
-    logo: unr.png
+    logo: logounr.png
 author: "Gamboa Nicolás - Roncaglia Andrés - Santini Franco"
 echo: false
 warning: false
@@ -25,7 +25,17 @@ library(caret)
 
 theme_set(theme_bw() + 
             theme(plot.title = element_text(hjust = 0.5),
-                  legend.position = "bottom"))
+                  legend.position = "bottom",
+                  plot.background = element_rect(fill = "#191919", colour = NA),
+                  panel.background = element_rect(fill = "#191919"),
+                  panel.grid.major = element_line(color = "black"),
+                  panel.grid.minor = element_line(color = "black"),
+                  legend.background = element_rect(fill = "grey8", colour = NA),
+                  axis.text = element_text(color = "grey70", size = 10),
+                  axis.title = element_text(color = "#bcc3c7", size = 13),
+                  title = element_text(color = "#bcc3c7", size = 16),
+                  legend.text = element_text(color = "#bcc3c7", size = 11),
+                  legend.title = element_text(color = "#bcc3c7", size = 13)))
 
 knitr::opts_chunk$set(fig.align = "center")
 
@@ -133,11 +143,13 @@ data <- data |> select(-n, -proposed_credit_limit, -X)
 
 
 
-## {.smaller}
+## {.center}
 
 El fraude con tarjetas de crédito es una de las principales amenazas que sufren los bancos. Con el auge de la tecnología las transacciones digitales facilitaron los traspasos de dinero y los medios de pago electrónicos son algo de cada día, pero junto con las ventajas también vinieron las consecuencias, y es que los métodos de fraude se han vuelto más sofisticados, generando pérdidas significativas a los bancos y afectando la confianza de los usuarios. Actividades como el uso no autorizado de tarjetas, la clonación de datos y transacciones fraudulentas requieren el desarrollo de tecnologías avanzadas para la detección temprana y la prevención.
 
-## Variables más relevantes {.smaller}
+##
+
+#### Variables más relevantes
 
 - `fraud_bool`: Indicadora de si la transacción fue fraude o no
 
@@ -153,6 +165,10 @@ El fraude con tarjetas de crédito es una de las principales amenazas que sufren
 
 - `phone_home_valid`: Validez del telefono fijo provisto
 
+##
+
+#### Variables más relevantes
+
 - `phone_mobile_valid`: Validez del telefono movil provisto
 
 - `has_other_cards`: Indicador de si la persona tiene otra tarjeta en el mismo banco
@@ -167,9 +183,7 @@ El fraude con tarjetas de crédito es una de las principales amenazas que sufren
 
 - `device_distinct_emails_8w`: Número de emails distintos en la página del banco desde el mismo dispositivo usado en las últimas 8 semanas
 
-## Análisis descriptivo
-
-##
+## Análisis descriptivo {.center}
 
 ```{r}
 
@@ -211,7 +225,7 @@ El fraude con tarjetas de crédito es una de las principales amenazas que sufren
   ggtitle("Fraude")) + plot_layout(axes = "collect")
 ```
 
-##
+## Análisis descriptivo {.center}
 
 ```{r}
 
@@ -254,7 +268,7 @@ El fraude con tarjetas de crédito es una de las principales amenazas que sufren
 ```
 
 
-##
+## Análisis descriptivo {.center}
 
 ```{r}
 
@@ -282,9 +296,8 @@ El fraude con tarjetas de crédito es una de las principales amenazas que sufren
     aes(x = credit_risk_score, y = after_stat(count)/sum(after_stat(count)))+
     geom_histogram(fill = "#284B63", color = "black", bins = 20)+
     scale_y_continuous(limits = c(0, 0.2)) +
-    scale_x_continuous(limits = c(-200, 400)) +
     xlab(label = "Score de riesgo crediticio") +
-    ylab(label = "Proporción") +
+    ylab(label = "Densidad") +
     ggtitle("No fraude")) +
 (data |> 
     filter(fraud_bool == 1) |> 
@@ -292,13 +305,12 @@ El fraude con tarjetas de crédito es una de las principales amenazas que sufren
     aes(x = credit_risk_score, y = after_stat(count)/sum(after_stat(count)))+
     geom_histogram(fill = "#F15946", color = "black", bins = 20)+
     scale_y_continuous(limits = c(0, 0.2)) +
-    scale_x_continuous(limits = c(-200, 400)) +
     xlab(label = "Score de riesgo crediticio") +
-    ylab(label = "Proporción") +
+    ylab(label = "Densidad") +
     ggtitle("Fraude")) + plot_layout(axes = "collect")
 ```
 
-##
+## Análisis descriptivo {.center}
 
 ```{r}
 
@@ -331,7 +343,7 @@ El fraude con tarjetas de crédito es una de las principales amenazas que sufren
 ```
 
 
-##
+## Análisis descriptivo {.center}
 
 
 ```{r}
@@ -364,17 +376,13 @@ El fraude con tarjetas de crédito es una de las principales amenazas que sufren
 ```
 
 
-## Ajuste del modelo
+## Modelo seleccionado
 
-Regresión paso a paso
+$$
+logit(\pi_i) = \beta_0 + \overbrace{\beta_I\cdot I_i}^{\text{Ingreso}} + \\ + \overbrace{\beta_{H1}\cdot H_{1i} + \beta_{H2}\cdot H_{2i} + \beta_{H3}\cdot H_{3i} + \beta_{H4}\cdot H_{4i} + \beta_{H5}\cdot H_{5i}}^{\text{Estado residencial}} + \\ +\overbrace{\beta_{Ph}\cdot Ph_i}^{\text{Validez tel. fijo}} + \overbrace{\beta_{Pm}\cdot Pm_i}^{\text{Validez celular}} + \overbrace{\beta_C\cdot C_i}^{\text{Otras tarjetas}} + \overbrace{\beta_L\cdot L_i}^{\text{Lim. crediticio}} + \\ + \overbrace{\beta_{D1}\cdot D_{1i} + \beta_{D2}\cdot D_{2i} + \beta_{D3}\cdot D_{3i} + \beta_{D4}\cdot D_{4i}}^{\text{Sistitema operativo del dispositivo}} + \\ +\overbrace{\beta_E\cdot E_i}^{\text{Emails}} + \beta_{IPm}\cdot I_i\cdot Pm_i + \beta_{CPm}\cdot C_i\cdot Pm_i 
+$$
 
-$logit()$
-
-## Linealidad de las variables
-
-## Interacciones
-
-## Comprobación del enlace
+## Comprobación del enlace {.center .bigger}
 
 
 ```{r}
@@ -399,7 +407,7 @@ modelo_logit.2 <- glm(fraud_bool ~ income + housing_status +
     na.action = na.omit)
 
 
-anova(modelo_logit, modelo_logit.2, test="LRT") 
+# anova(modelo_logit, modelo_logit.2, test="LRT") 
 # Este enlace es apropiado
 
 # Comprobacion enlace probit --------------------
@@ -417,7 +425,7 @@ modelo_probit.2 <- glm(fraud_bool ~ income + housing_status +
     family = binomial(link = "probit"),
     na.action = na.omit)
 
-anova(modelo_probit, modelo_probit.2, test="LRT") 
+# anova(modelo_probit, modelo_probit.2, test="LRT") 
 # Este enlace es apropiado
 
 
@@ -436,19 +444,60 @@ modelo_cloglog.2 <- glm(fraud_bool ~ income + housing_status +
     family = binomial(link = "cloglog"),
     na.action = na.omit)
 
-anova(modelo_cloglog, modelo_cloglog.2, test="LRT") 
+# anova(modelo_cloglog, modelo_cloglog.2, test="LRT") 
 # Este enlace es apropiado
 
 
-hltest(modelo_logit)
+hltest(modelo_logit, verbose = F)
 ```
 
+<style type="text/css">
+.tg  {border-collapse:collapse;border-spacing:0;}
+.tg td{border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;
+  overflow:hidden;padding:10px 5px;word-break:normal;}
+.tg th{border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;
+  font-weight:normal;overflow:hidden;padding:10px 5px;word-break:normal;}
+.tg .tg-49rs{border-color:inherit;font-size:large;text-align:center;vertical-align:top}
+</style>
+<table class="tg"><thead>
+  <tr>
+    <th class="tg-49rs">Enlace</th>
+    <th class="tg-49rs">Estadistica</th>
+    <th class="tg-49rs">Grados de libertad</th>
+    <th class="tg-49rs">Valor p</th>
+  </tr></thead>
+<tbody>
+  <tr>
+    <td class="tg-49rs">Logístico</td>
+    <td class="tg-49rs">0.28314</td>
+    <td class="tg-49rs">1</td>
+    <td class="tg-49rs">0.5947</td>
+  </tr>
+  <tr>
+    <td class="tg-49rs">Probit</td>
+    <td class="tg-49rs">0.49868</td>
+    <td class="tg-49rs">1</td>
+    <td class="tg-49rs">0.4801</td>
+  </tr>
+  <tr>
+    <td class="tg-49rs">Cloglog</td>
+    <td class="tg-49rs">0.01148</td>
+    <td class="tg-49rs">1</td>
+    <td class="tg-49rs">0.9147</td>
+  </tr>
+</tbody>
+</table>
 
-## Analisis de residuos
 
-### Evaluación de la componente sistemática
+Valor p del test de bondad del ajuste de Hosmer-Lemeshow para el modelo Logístico: 
 
-##
+. . .
+
+$$0.80938$$
+
+## Análisis de residuos {.center}
+
+### Evaluación de la componente sistemática ARREGLAR {.center}
 
 ```{r}
 # Residuos cuantil
@@ -460,38 +509,33 @@ mu_logit <- fitted(modelo_logit)
 ### Gráfico de residuos cuantil vs. probabilidades estimadas (ajuste logit)
 G1 <- ggplot(data_enlaces, aes(y = rQ.logit, x = fitted(modelo_probit))) + 
   geom_point(fill = "orange", shape = 21, size = 3, alpha = 0.4) +
-  geom_hline(yintercept = 0) + ylim(-3, 3) + 
-  geom_hline(yintercept = -3, linetype = "dashed") + 
-  geom_hline(yintercept =  3, linetype = "dashed") +
-  labs(title = "Gráfico de residuos cuantil vs. las probabilidades estimadas", x = expression(hat(pi)), y = "Residuos cuantil") +
-  theme_minimal()
+  geom_hline(yintercept = 0, color = "grey80") + 
+  geom_hline(yintercept = -3, linetype = "dashed", color = "grey80") + 
+  geom_hline(yintercept =  3, linetype = "dashed", color = "grey80") +
+  labs(title = "Gráfico de residuos cuantil vs.\nlas probabilidades estimadas", x = expression(hat(pi)), y = "Residuos cuantil")
 
 ### Gráfico de residuos cuantil vs. la media estimada (ajuste logit)
 G2 <- ggplot(data_enlaces, aes(y = rQ.logit, x = mu_logit)) + 
   geom_point(fill = "orange", shape = 21, size = 3, alpha = 0.4) +
-  geom_hline(yintercept = 0) + ylim(-3, 3) + 
-  geom_hline(yintercept = -3, linetype = "dashed") + 
-  geom_hline(yintercept =  3, linetype = "dashed") +
-  labs(title = "Gráfico de residuos cuantil vs. las medias estimadas", x = expression(hat(mu)), y = "Residuos cuantil") +
-  theme_minimal()
+  geom_hline(yintercept = 0, color = "grey80") + 
+  geom_hline(yintercept = -3, linetype = "dashed", color = "grey80") + 
+  geom_hline(yintercept =  3, linetype = "dashed", color = "grey80") +
+  labs(title = "Gráfico de residuos cuantil vs.\nlas medias estimadas", x = expression(hat(mu)), y = "Residuos cuantil")
 
 G1+G2
 ```
 
-## Analisis de residuos
-### Comprobación de la distribución propuesta
-
-##
+## Análisis de residuos {.center}
+### Comprobación de la distribución propuesta {.center}
 
 ```{r}
 
 # Gráfico QQ
 ggplot(data_enlaces, aes(sample = rQ.logit)) +
   stat_qq(distribution = qnorm, fill = "orange", shape = 21, size = 3, alpha = 0.4) +
-  stat_qq_line() +
-  annotate(geom = "label", label = paste("Test de Normalidad Shapiro-Wilks\n p-value:", round(shapiro.test(rQ.logit)$p.value, 2)), x = 0.9, y = -1.5, fill = "lightblue1") +
-  labs(title = "Gráfico probabilístico normal con residuos cuantil",  x = "Cuantiles teóricos", y = "Cuantiles de los residuos cuantil") +
-  theme_minimal()
+  stat_qq_line(color = "grey90") +
+  annotate(geom = "label", label = paste("Test de Normalidad Shapiro-Wilks\n p-value:", round(shapiro.test(rQ.logit)$p.value, 2)), x = 0.9, y = -1.5, fill = "grey13", color = "grey90") +
+  labs(title = "Gráfico probabilístico normal con residuos cuantil",  x = "Cuantiles teóricos", y = "Cuantiles de los residuos cuantil")
 
 
 ```
@@ -500,7 +544,7 @@ ggplot(data_enlaces, aes(sample = rQ.logit)) +
 ## Interpretaciones
 
 
-## Evaluación de la capacidad predictiva
+## Evaluación de la capacidad predictiva {.center}
 
 ## Curva ROC
 
@@ -515,15 +559,18 @@ data.frame(especificidad = curva_roc_knn$specificities,
            ) |> 
   arrange(especificidad, sensibilidad) |> 
   ggplot() +
-  geom_line(aes(x = especificidad, y = sensibilidad)) +
+  geom_line(aes(x = especificidad, y = sensibilidad), color = "grey90") +
   scale_x_reverse() +
-  geom_segment(x = -1, xend=0, y = 0, yend = 1) +
-  annotate(x = 0.45, y = 0.75, geom = "text", label = paste("AUC =", round(curva_roc_knn$auc, digits = 4))) +
+  geom_segment(x = -1, xend=0, y = 0, yend = 1, color = "grey90") +
+  annotate(x = 0.45, y = 0.75, geom = "text", label = paste("AUC =", round(curva_roc_knn$auc, digits = 4)), color = "grey90") +
   geom_mark_ellipse(
     aes(x = best_knn$specificity, y = best_knn$sensitivity,
       label = format(round(as.numeric(best_knn$threshold), digits = 6), scientific = F),
       description = "Punto de corte"), 
-    color = "red", 
+    color = "red",
+    label.fill = "grey15",
+    label.colour= "grey90",
+    con.colour= "grey90",
     expand = 0.01) + 
   labs(x = "Especificidad", y = "Sensibilidad")
 

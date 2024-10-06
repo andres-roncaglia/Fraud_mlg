@@ -484,7 +484,7 @@ Por lo general, cuando las transacciones son fraudulentas la persona decide no m
 
 # Modelado
 
-Teniendo todo esto en cuenta buscamos un modelo que ajuste bien a nuestros datos, para esto primero realizamos una seleccion de variables paso a paso, obteniendo el siguiente modelo:
+Teniendo todo esto en cuenta se buscó un modelo que ajuste bien a los datos, para esto primero se realizó una selección de variables paso a paso, obteniendo el siguiente modelo:
 
 ```{r}
 
@@ -566,6 +566,7 @@ modelo_logit <- glm(fraud_bool ~ income + housing_status +
 summary(modelo_logit)
 
 ```
+
 ```{r}
 
 # Prueba de interacciones dobles de interés
@@ -609,12 +610,6 @@ anova(modelo_logit_2, modelo_logit_3)
 $$
 logit(\pi_i) = \beta_0 + \beta_I\cdot I_i + \beta_{H1}\cdot H_{1i} + \beta_{H2}\cdot H_{2i} + \beta_{H3}\cdot H_{3i} + \beta_{H4}\cdot H_{4i} + \beta_{H5}\cdot H_{5i} + \beta_{Ph}\cdot Ph_i + \beta_{Pm}\cdot Pm_i + \beta_C\cdot C_i + \beta_L\cdot L_i + \beta_D\cdot D_i + \beta_E\cdot E_i + \beta_{IPm}\cdot I_i\cdot Pm_i + \beta_{CPm}\cdot C_i\cdot Pm_i 
 $$
-
-
-
-
-
-
 
 Se procede a comprobar el enlace:
 

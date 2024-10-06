@@ -7,7 +7,7 @@
 <link href="Presentacion_files/libs/quarto-html/tippy.css" rel="stylesheet">
 <link href="Presentacion_files/libs/quarto-html/light-border.css" rel="stylesheet">
 <link href="Presentacion_files/libs/quarto-html/quarto-html.min.css" rel="stylesheet" data-mode="light">
-<link href="Presentacion_files/libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles"><meta charset="utf-8">
+<link href="Presentacion_files/libs/quarto-html/quarto-syntax-highlighting-dark.css" rel="stylesheet" id="quarto-text-highlighting-styles"><meta charset="utf-8">
   <meta name="generator" content="quarto-1.4.551">
 
   <meta name="author" content="Gamboa Nicolás - Roncaglia Andrés - Santini Franco">
@@ -321,7 +321,7 @@
     }
   </style>
 </head>
-<body class="quarto-light">
+<body class="quarto-dark">
   <div class="reveal">
     <div class="slides">
 
@@ -337,12 +337,13 @@ Gamboa Nicolás - Roncaglia Andrés - Santini Franco
 </div>
 
 </section>
-<section id="section" class="slide level2 smaller">
+<section id="section" class="slide level2 center">
 <h2></h2>
 <p>El fraude con tarjetas de crédito es una de las principales amenazas que sufren los bancos. Con el auge de la tecnología las transacciones digitales facilitaron los traspasos de dinero y los medios de pago electrónicos son algo de cada día, pero junto con las ventajas también vinieron las consecuencias, y es que los métodos de fraude se han vuelto más sofisticados, generando pérdidas significativas a los bancos y afectando la confianza de los usuarios. Actividades como el uso no autorizado de tarjetas, la clonación de datos y transacciones fraudulentas requieren el desarrollo de tecnologías avanzadas para la detección temprana y la prevención.</p>
 </section>
-<section id="variables-más-relevantes" class="slide level2 smaller">
-<h2>Variables más relevantes</h2>
+<section id="section-1" class="slide level2">
+<h2></h2>
+<h4 id="variables-más-relevantes">Variables más relevantes</h4>
 <ul>
 <li><p><code>fraud_bool</code>: Indicadora de si la transacción fue fraude o no</p></li>
 <li><p><code>income</code>: Ingreso anual en cuantiles</p></li>
@@ -351,6 +352,12 @@ Gamboa Nicolás - Roncaglia Andrés - Santini Franco
 <li><p><code>credit_risk_score</code>: Score de riesgo de la aplicación</p></li>
 <li><p><code>email_is_free</code>: Tipo del dominio del email del aplicante (email pago o gratis)</p></li>
 <li><p><code>phone_home_valid</code>: Validez del telefono fijo provisto</p></li>
+</ul>
+</section>
+<section id="section-2" class="slide level2">
+<h2></h2>
+<h4 id="variables-más-relevantes-1">Variables más relevantes</h4>
+<ul>
 <li><p><code>phone_mobile_valid</code>: Validez del telefono movil provisto</p></li>
 <li><p><code>has_other_cards</code>: Indicador de si la persona tiene otra tarjeta en el mismo banco</p></li>
 <li><p><code>proposed_credit_limit</code>: Crédito limite propuesto por el aplicante</p></li>
@@ -360,127 +367,130 @@ Gamboa Nicolás - Roncaglia Andrés - Santini Franco
 <li><p><code>device_distinct_emails_8w</code>: Número de emails distintos en la página del banco desde el mismo dispositivo usado en las últimas 8 semanas</p></li>
 </ul>
 </section>
-<section id="análisis-descriptivo" class="slide level2">
+<section id="análisis-descriptivo" class="slide level2 center">
 <h2>Análisis descriptivo</h2>
-</section>
-<section id="section-1" class="slide level2">
-<h2></h2>
 
 <img data-src="Presentacion_files/figure-revealjs/unnamed-chunk-3-1.png" class="quarto-figure quarto-figure-center r-stretch" width="960"></section>
-<section id="section-2" class="slide level2">
-<h2></h2>
+<section id="análisis-descriptivo-1" class="slide level2 center">
+<h2>Análisis descriptivo</h2>
 
 <img data-src="Presentacion_files/figure-revealjs/unnamed-chunk-4-1.png" class="quarto-figure quarto-figure-center r-stretch" width="960"></section>
-<section id="section-3" class="slide level2">
-<h2></h2>
+<section id="análisis-descriptivo-2" class="slide level2 center">
+<h2>Análisis descriptivo</h2>
 
 <img data-src="Presentacion_files/figure-revealjs/unnamed-chunk-5-1.png" class="quarto-figure quarto-figure-center r-stretch" width="960"></section>
-<section id="section-4" class="slide level2">
-<h2></h2>
+<section id="análisis-descriptivo-3" class="slide level2 center">
+<h2>Análisis descriptivo</h2>
 
 <img data-src="Presentacion_files/figure-revealjs/unnamed-chunk-6-1.png" class="quarto-figure quarto-figure-center r-stretch" width="960"></section>
-<section id="section-5" class="slide level2">
-<h2></h2>
+<section id="análisis-descriptivo-4" class="slide level2 center">
+<h2>Análisis descriptivo</h2>
 
 <img data-src="Presentacion_files/figure-revealjs/unnamed-chunk-7-1.png" class="quarto-figure quarto-figure-center r-stretch" width="960"></section>
-<section id="ajuste-del-modelo" class="slide level2">
-<h2>Ajuste del modelo</h2>
-<p>Regresión paso a paso</p>
-<p><span class="math inline">\(logit()\)</span></p>
+<section id="modelo-seleccionado" class="slide level2">
+<h2>Modelo seleccionado</h2>
+<p><span class="math display">\[
+logit(\pi_i) = \beta_0 + \overbrace{\beta_I\cdot I_i}^{\text{Ingreso}} + \\ + \overbrace{\beta_{H1}\cdot H_{1i} + \beta_{H2}\cdot H_{2i} + \beta_{H3}\cdot H_{3i} + \beta_{H4}\cdot H_{4i} + \beta_{H5}\cdot H_{5i}}^{\text{Estado residencial}} + \\ +\overbrace{\beta_{Ph}\cdot Ph_i}^{\text{Validez tel. fijo}} + \overbrace{\beta_{Pm}\cdot Pm_i}^{\text{Validez celular}} + \overbrace{\beta_C\cdot C_i}^{\text{Otras tarjetas}} + \overbrace{\beta_L\cdot L_i}^{\text{Lim. crediticio}} + \\ + \overbrace{\beta_{D1}\cdot D_{1i} + \beta_{D2}\cdot D_{2i} + \beta_{D3}\cdot D_{3i} + \beta_{D4}\cdot D_{4i}}^{\text{Sistitema operativo del dispositivo}} + \\ +\overbrace{\beta_E\cdot E_i}^{\text{Emails}} + \beta_{IPm}\cdot I_i\cdot Pm_i + \beta_{CPm}\cdot C_i\cdot Pm_i
+\]</span></p>
 </section>
-<section id="linealidad-de-las-variables" class="slide level2">
-<h2>Linealidad de las variables</h2>
-</section>
-<section id="interacciones" class="slide level2">
-<h2>Interacciones</h2>
-</section>
-<section id="comprobación-del-enlace" class="slide level2">
+<section id="comprobación-del-enlace" class="slide level2 center bigger">
 <h2>Comprobación del enlace</h2>
-<div class="cell" data-layout-align="center">
-<div class="cell-output cell-output-stdout">
-<pre><code>Analysis of Deviance Table
-
-Model 1: fraud_bool ~ income + housing_status + phone_home_valid + phone_mobile_valid + 
-    has_other_cards + proposed_credit_limit_cat + device_os + 
-    device_distinct_emails_8w
-Model 2: fraud_bool ~ income + housing_status + phone_home_valid + phone_mobile_valid + 
-    has_other_cards + proposed_credit_limit_cat + device_os + 
-    device_distinct_emails_8w + pred.2.logit
-  Resid. Df Resid. Dev Df Deviance Pr(&gt;Chi)
-1       409     229.89                     
-2       408     229.60  1  0.28314   0.5947</code></pre>
-</div>
-<div class="cell-output cell-output-stdout">
-<pre><code>Analysis of Deviance Table
-
-Model 1: fraud_bool ~ income + housing_status + phone_home_valid + phone_mobile_valid + 
-    has_other_cards + proposed_credit_limit_cat + device_os + 
-    device_distinct_emails_8w
-Model 2: fraud_bool ~ income + housing_status + phone_home_valid + phone_mobile_valid + 
-    has_other_cards + proposed_credit_limit_cat + device_os + 
-    device_distinct_emails_8w + pred.2.probit
-  Resid. Df Resid. Dev Df Deviance Pr(&gt;Chi)
-1       409     230.04                     
-2       408     229.54  1  0.49868   0.4801</code></pre>
-</div>
-<div class="cell-output cell-output-stdout">
-<pre><code>Analysis of Deviance Table
-
-Model 1: fraud_bool ~ income + housing_status + phone_home_valid + phone_mobile_valid + 
-    has_other_cards + proposed_credit_limit_cat + device_os + 
-    device_distinct_emails_8w
-Model 2: fraud_bool ~ income + housing_status + phone_home_valid + phone_mobile_valid + 
-    has_other_cards + proposed_credit_limit_cat + device_os + 
-    device_distinct_emails_8w + pred.2.cloglog
-  Resid. Df Resid. Dev Df Deviance Pr(&gt;Chi)
-1       409     228.43                     
-2       408     228.42  1 0.011481   0.9147</code></pre>
-</div>
-<div class="cell-output cell-output-stdout">
-<pre><code>
-   The Hosmer-Lemeshow goodness-of-fit test
-
- Group Size Observed     Expected
-     1   44        0  0.006753789
-     2   44        0  0.207370063
-     3   44        1  0.593732358
-     4   45        0  1.127851542
-     5   45        3  1.858645408
-     6   44        3  3.020927674
-     7   44        8  5.382100961
-     8   44        7  9.149775769
-     9   44       16 16.283726011
-    10   37       27 27.369116838
-
-         Statistic =  4.5005 
-degrees of freedom =  8 
-           p-value =  0.80938 </code></pre>
-</div>
+<style type="text/css">
+.tg  {border-collapse:collapse;border-spacing:0;}
+.tg td{border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;
+  overflow:hidden;padding:10px 5px;word-break:normal;}
+.tg th{border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;
+  font-weight:normal;overflow:hidden;padding:10px 5px;word-break:normal;}
+.tg .tg-49rs{border-color:inherit;font-size:large;text-align:center;vertical-align:top}
+</style>
+<table class="tg">
+<thead>
+<tr>
+<th class="tg-49rs">
+Enlace
+</th>
+<th class="tg-49rs">
+Estadistica
+</th>
+<th class="tg-49rs">
+Grados de libertad
+</th>
+<th class="tg-49rs">
+Valor p
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tg-49rs">
+Logístico
+</td>
+<td class="tg-49rs">
+0.28314
+</td>
+<td class="tg-49rs">
+1
+</td>
+<td class="tg-49rs">
+0.5947
+</td>
+</tr>
+<tr>
+<td class="tg-49rs">
+Probit
+</td>
+<td class="tg-49rs">
+0.49868
+</td>
+<td class="tg-49rs">
+1
+</td>
+<td class="tg-49rs">
+0.4801
+</td>
+</tr>
+<tr>
+<td class="tg-49rs">
+Cloglog
+</td>
+<td class="tg-49rs">
+0.01148
+</td>
+<td class="tg-49rs">
+1
+</td>
+<td class="tg-49rs">
+0.9147
+</td>
+</tr>
+</tbody>
+</table>
+<p>Valor p del test de bondad del ajuste de Hosmer-Lemeshow para el modelo Logístico:</p>
+<div class="fragment">
+<p><span class="math display">\[0.80938\]</span></p>
 </div>
 </section>
-<section id="analisis-de-residuos" class="slide level2">
-<h2>Analisis de residuos</h2>
-<h3 id="evaluación-de-la-componente-sistemática">Evaluación de la componente sistemática</h3>
-</section>
-<section id="section-6" class="slide level2">
-<h2></h2>
+<section id="análisis-de-residuos" class="slide level2 center">
+<h2>Análisis de residuos</h2>
+<h3 class="center" id="evaluación-de-la-componente-sistemática">Evaluación de la componente sistemática</h3>
 
 <img data-src="Presentacion_files/figure-revealjs/unnamed-chunk-9-1.png" class="quarto-figure quarto-figure-center r-stretch" width="960"></section>
-<section id="comprobación-de-la-distribución-propuesta" class="slide level2">
-<h2>Comprobación de la distribución propuesta</h2>
+<section id="análisis-de-residuos-1" class="slide level2 center">
+<h2>Análisis de residuos</h2>
+<h3 class="center" id="comprobación-de-la-distribución-propuesta">Comprobación de la distribución propuesta</h3>
 
 <img data-src="Presentacion_files/figure-revealjs/unnamed-chunk-10-1.png" class="quarto-figure quarto-figure-center r-stretch" width="960"></section>
 <section id="interpretaciones" class="slide level2">
 <h2>Interpretaciones</h2>
 </section>
-<section id="evaluación-de-la-capacidad-predictiva" class="slide level2">
+<section id="evaluación-de-la-capacidad-predictiva" class="slide level2 center">
 <h2>Evaluación de la capacidad predictiva</h2>
 </section>
 <section id="curva-roc" class="slide level2">
 <h2>Curva ROC</h2>
 
 <img data-src="Presentacion_files/figure-revealjs/unnamed-chunk-11-1.png" class="quarto-figure quarto-figure-center r-stretch" width="960"></section>
-<section id="section-7" class="slide level2">
+<section id="section-3" class="slide level2">
 <h2></h2>
 <div class="cell" data-layout-align="center">
 <div class="cell-output cell-output-stdout">
@@ -514,7 +524,7 @@ Prediction   0   1
 </div>
 </div>
 <div class="quarto-auto-generated-content">
-<p><img src="unr.png" class="slide-logo"></p>
+<p><img src="logounr.png" class="slide-logo"></p>
 <div class="footer footer-default">
 
 </div>

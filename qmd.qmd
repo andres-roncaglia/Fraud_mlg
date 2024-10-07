@@ -2,6 +2,7 @@
 format: 
   pdf:
     fig-pos: "H"
+    tbl-pos: "H"
 lang: es
 echo: FALSE
 message: FALSE
@@ -20,7 +21,7 @@ geometry:
 \vspace{3cm}
 
 ```{r logo facultad, echo=F, include = T, out.width= "60%"}
-knitr::include_graphics("logounr.png")
+knitr::include_graphics("Imgs/unr.jpeg")
 ```
 
 \pagenumbering{gobble}
@@ -33,7 +34,7 @@ knitr::include_graphics("logounr.png")
 \vspace{1cm}
 
 \Large
-**Guardianes de la galaxia financiera**
+**Pradicción de fraude financiero**
 
 
 \vspace{0.3cm}
@@ -76,29 +77,29 @@ El fraude con tarjetas de crédito es una de las principales amenazas que sufren
 
 - `name_email_similarity`: Similitud del nombre en el email y el nombre del solicitante
 
-- `prev_address_months_count`: Es el número de meses que la persona estuvo viviendo en su locacion anterior
+<!-- - `prev_address_months_count`: Es el número de meses que la persona estuvo viviendo en su locacion anterior -->
 
-- `current_address_months_count`: Es el número de meses que la persona estuvo viviendo en su locacion actual
+<!-- - `current_address_months_count`: Es el número de meses que la persona estuvo viviendo en su locación actual -->
 
 - `customer_age`: Edad del cliente en décadas
 
 - `days_since_request`: Días desde la solicitud
 
-- `intended_balcon_amount`: Valor de la transferecia inicial para aplicar al credito
+<!-- - `intended_balcon_amount`: Valor de la transferecia inicial para aplicar al crédito -->
 
 - `payment_type`: Tipo del plan de pago 
 
-- `zip_count_4w`: Número de aplicaciónes con el mismo código postal en las últimas 4 semanas
+<!-- - `zip_count_4w`: Número de aplicaciónes con el mismo código postal en las últimas 4 semanas -->
 
-- `velocity_6h`: Es la velocidad del total de solicitudes de transferencias de la tarjeta en las últimas 6 horas
+<!-- - `velocity_6h`: Es la velocidad del total de solicitudes de transferencias de la tarjeta en las últimas 6 horas -->
 
-- `velocity_24h`: Es la velocidad del total de solicitudes de transferencias de la tarjeta en las últimas 24 horas
+<!-- - `velocity_24h`: Es la velocidad del total de solicitudes de transferencias de la tarjeta en las últimas 24 horas -->
 
-- `velocity_4w`: Es la velocidad del total de solicitudes de transferencias de la tarjeta en las últimas 4 semanas
+<!-- - `velocity_4w`: Es la velocidad del total de solicitudes de transferencias de la tarjeta en las últimas 4 semanas -->
 
-- `bank_branch_count_8w`: Número total de solicitudes en la seleccionada rama del banco en las últimas 8 semanas
+<!-- - `bank_branch_count_8w`: Número total de solicitudes en la seleccionada rama del banco en las últimas 8 semanas -->
 
-- `date_of_birth_distinct_emails_4w`: Número de emails de aplicantes con la misma fecha de nacimiento en las últimas 4 semanas
+<!-- - `date_of_birth_distinct_emails_4w`: Número de emails de aplicantes con la misma fecha de nacimiento en las últimas 4 semanas -->
 
 - `employment_status`: Estado de empleo del solicitante
 
@@ -112,17 +113,17 @@ El fraude con tarjetas de crédito es una de las principales amenazas que sufren
 
 - `phone_mobile_valid`: Validez del telefono movil provisto
 
-- `bank_months_count`: Antiguedad de la cuenta anterior en meses
+<!-- - `bank_months_count`: Antiguedad de la cuenta anterior en meses -->
 
-- `has_other_cards`: Indicador de si la persona tiene otra tarjeta en el mismo banco
+- `has_other_cards`: Indicadora de si la persona tiene otra tarjeta en el mismo banco
 
 - `proposed_credit_limit`: Crédito limite propuesto por el aplicante
 
 - `foreign_request`: Indicadora de si la solicitud fue hecha en el mismo pais que el banco
 
-- `source`: Fuente online de la aplicación (Internet / app movil) 
+<!-- - `source`: Fuente online de la aplicación (Internet / app movil)  -->
 
-- `session_length_in_minutes`: Tiempo de la sesion en la pagina del banco en minutos
+<!-- - `session_length_in_minutes`: Tiempo de la sesión en la página del banco en minutos -->
 
 - `device_os`: Sistema operativo del dispositivo que hizo la solicitud
 
@@ -130,9 +131,9 @@ El fraude con tarjetas de crédito es una de las principales amenazas que sufren
 
 - `device_distinct_emails_8w`: Número de emails distintos en la página del banco desde el mismo dispositivo usado en las últimas 8 semanas
 
-- `device_fraud_count`: Número de solicitudes fraudulentas desde el dispositivo utilizado 
+<!-- - `device_fraud_count`: Número de solicitudes fraudulentas desde el dispositivo utilizado  -->
 
-- `month`: Mes en el que fue realizada la solicitud
+<!-- - `month`: Mes en el que fue realizada la solicitud -->
 
 \newpage
 
@@ -248,7 +249,16 @@ no_fraude <- no_fraude[sel_nofraude,]
 data_test <- rbind(fraude, no_fraude)
 
 
-data_test <- data_test |> select(-n, -proposed_credit_limit, -X)
+data_test <- data_test |> select(-n, -proposed_credit_limit, -X) |> 
+  mutate(income_ord = as.numeric(income),
+         proposed_credit_limit_cat_ord = as.numeric(proposed_credit_limit_cat),
+         income = income_ord/10,
+         proposed_credit_limit = case_when(proposed_credit_limit_cat_ord == 1 ~ 200,
+                                          proposed_credit_limit_cat_ord == 2 ~ 500,
+                                          proposed_credit_limit_cat_ord == 3 ~ 1000,
+                                          proposed_credit_limit_cat_ord == 4 ~ 1500,
+                                          T ~ 2000))
+
 
 
 
@@ -269,6 +279,7 @@ data <- data |> select(-n, -proposed_credit_limit, -X)
   geom_bar(color = "black", fill = "#284B63") +
   xlab(label = "Ingreso anual") +
   ylab(label = "Proporción") +
+  scale_x_continuous(breaks = seq(0.1,0.9,0.1)) +
   scale_y_continuous(limits = c(0,0.8)) +
   ggtitle("No fraude")) +
 (data |> 
@@ -279,6 +290,7 @@ data <- data |> select(-n, -proposed_credit_limit, -X)
    xlab(label = "Ingreso anual") +
    ylab(label = "Proporción") +
    scale_y_continuous(limits = c(0,0.8)) +
+   scale_x_continuous(breaks = seq(0.1,0.9,0.1)) +
    ggtitle("Fraude"))) + plot_layout(axes = "collect")
 ```
 
@@ -504,6 +516,13 @@ modelo_logit <- glm(fraud_bool ~ income + housing_status +
 # summary(modelo_logit)
 ```
 
+$$
+logit(\pi_i) = \beta_0 + \beta_I\cdot I_i + \beta_{H1}\cdot H_{1i} + \beta_{H2}\cdot H_{2i} + \beta_{H3}\cdot H_{3i} + \beta_{H4}\cdot H_{4i} + \beta_{H5}\cdot H_{5i} + \beta_{Ph}\cdot Ph_i +
+$$
+$$+ \beta_{Pm}\cdot Pm_i +  \beta_C\cdot C_i + \beta_L\cdot L_i + \beta_{D1}\cdot D_{1i} + \beta_{D2}\cdot D_{2i} + \beta_{D3}\cdot D_{3i} + \beta_{D4}\cdot D_{4i} + \beta_E\cdot E_i$$
+
+Luego, al tener 2 variables continuas, se decidió comprobar la linealidad de estas:
+
 ```{r}
 
 # Linealidad de las variables ordinales 
@@ -562,9 +581,11 @@ modelo_logit <- glm(fraud_bool ~ income + housing_status +
     family = binomial(link = "logit"), 
     na.action = na.omit)
 
-summary(modelo_logit)
+# summary(modelo_logit)
 
 ```
+
+Además, se propucieron ciertas interacciones: 
 
 ```{r}
 
@@ -600,20 +621,21 @@ modelo_logit_3 <- glm(fraud_bool ~ income + housing_status +
     family = binomial(link = "logit"), 
     na.action = na.omit)
 
-anova(modelo_logit_2, modelo_logit_3)
+# anova(modelo_logit_2, modelo_logit_3)
 
-summary(modelo_logit_2)
+# summary(modelo_logit_2)
 ```
 
 
-$$
-logit(\pi_i) = \beta_0 + \beta_I\cdot I_i + \beta_{H1}\cdot H_{1i} + \beta_{H2}\cdot H_{2i} + \beta_{H3}\cdot H_{3i} + \beta_{H4}\cdot H_{4i} + \beta_{H5}\cdot H_{5i} + \beta_{Ph}\cdot Ph_i + \beta_{Pm}\cdot Pm_i + \beta_C\cdot C_i + \beta_L\cdot L_i + \beta_D\cdot D_i + \beta_E\cdot E_i + \beta_{IPm}\cdot I_i\cdot Pm_i + \beta_{CPm}\cdot C_i\cdot Pm_i 
-$$
+<!-- $$ -->
+<!-- logit(\pi_i) = \beta_0 + \beta_I\cdot I_i + \beta_{H1}\cdot H_{1i} + \beta_{H2}\cdot H_{2i} + \beta_{H3}\cdot H_{3i} + \beta_{H4}\cdot H_{4i} + \beta_{H5}\cdot H_{5i} + \beta_{Ph}\cdot Ph_i + \beta_{Pm}\cdot Pm_i + \beta_C\cdot C_i + \beta_L\cdot L_i + \beta_D\cdot D_i + \beta_E\cdot E_i + \beta_{IPm}\cdot I_i\cdot Pm_i + \beta_{CPm}\cdot C_i\cdot Pm_i  -->
+<!-- $$ -->
 
-Se procede a comprobar el enlace:
+Sin embargo se mantuvo el modelo lineal presentado anteriormente (AGREGAR REFERENCIA A LA ECUACION)
 
+Una vez definida la componente lineal se decidió comprobar el enlace:
 
-```{r}
+```{r Comprobacion del enlace modelo con interaccion, eval=FALSE}
 data_enlaces <- data
 
 # Comprobacion enlace logit --------------------
@@ -673,16 +695,140 @@ modelo_cloglog.2 <- glm(fraud_bool ~ income + housing_status +
 
 ```
 
+
+```{r comrpobacion del enlace modelo sin interaccion}
+data_enlaces <- data
+
+# Comprobacion enlace logit --------------------
+pred.logit<-predict(modelo_logit)
+data_enlaces$pred.2.logit <- pred.logit*pred.logit
+
+modelo_logit.2 <- glm(fraud_bool ~ income + housing_status + 
+    phone_home_valid + phone_mobile_valid + has_other_cards + 
+    proposed_credit_limit + device_os + device_distinct_emails_8w + pred.2.logit,
+    data = data_enlaces,
+    family = binomial(link = "logit"),
+    na.action = na.omit)
+
+
+# anova(modelo_logit, modelo_logit.2, test="LRT")
+
+# Este enlace es apropiado
+
+# Comprobacion enlace probit --------------------
+modelo_probit <- glm(fraud_bool ~ income + housing_status + 
+    phone_home_valid + phone_mobile_valid + has_other_cards + 
+    proposed_credit_limit + device_os + device_distinct_emails_8w,
+    data = data, family = binomial(link = "probit"), na.action = na.omit)
+
+pred.probit <- predict(modelo_probit)
+data_enlaces$pred.2.probit <- pred.probit*pred.probit
+
+modelo_probit.2 <- glm(fraud_bool ~ income + housing_status + 
+    phone_home_valid + phone_mobile_valid + has_other_cards + 
+    proposed_credit_limit + device_os + device_distinct_emails_8w + pred.2.probit,
+    data = data_enlaces,
+    family = binomial(link = "probit"),
+    na.action = na.omit)
+
+# anova(modelo_probit, modelo_probit.2, test="LRT")
+
+# Este enlace es apropiado
+
+
+# Comprobacion enlace cloglog --------------------
+modelo_cloglog <- glm(fraud_bool ~ income + housing_status + 
+    phone_home_valid + phone_mobile_valid + has_other_cards + 
+    proposed_credit_limit + device_os + device_distinct_emails_8w,
+    data = data, family = binomial(link = "cloglog"), na.action = na.omit)
+
+pred.cloglog <- predict(modelo_cloglog)
+data_enlaces$pred.2.cloglog <- pred.cloglog*pred.cloglog
+
+modelo_cloglog.2 <- glm(fraud_bool ~ income + housing_status + 
+    phone_home_valid + phone_mobile_valid + has_other_cards + 
+    proposed_credit_limit + device_os + device_distinct_emails_8w + pred.2.cloglog,
+    data = data_enlaces,
+    family = binomial(link = "cloglog"),
+    na.action = na.omit)
+
+# anova(modelo_cloglog, modelo_cloglog.2, test="LRT")
+
+# Este enlace es apropiado
+
+```
+
+
+|   Enlace  | Estadistica test RV | Grados de libertad test RV | Valor p test RV | Estadistica test H-L | Grados de libertad test H-L | Valor p  test H-L |
+|:---------:|:-------------------:|:--------------------------:|:---------------:|:--------------------:|:---------------------------:|:-----------------:|
+| Logístico |        0.2831       |              1             |      0.3799     |        3.4613        |              8              |       0.9022      |
+|   Probit  |        0.4987       |              1             |      0.1689     |        5.9454        |              8              |       0.6534      |
+|  Cloglog  |        0.0115       |              1             |      0.9663     |        3.1135        |              8              |       0.9270      |
+
+:Test de comprabación de la función de enlace y bondad de ajuste
+
 Los tres enlaces son apropiados, por lo tanto nos quedamos con el enlace logit por su facilidad en la interpretación.
 
-```{r}
+```{r Test hosmer y lemeshow}
 # hltest(modelo_logit_3)
+# hltest(modelo_logit)
+# hltest(modelo_probit)
+# hltest(modelo_cloglog)
 ```
 
 ### Modelo estimado
+
 $$
-logit(\pi_i) = \hat\beta_0 + \hat\beta_I\cdot I_i + \hat\beta_{H1}\cdot H_{1i} + \hat\beta_{H2}\cdot H_{2i} + \hat\beta_{H3}\cdot H_{3i} + \hat\beta_{H4}\cdot H_{4i} + \hat\beta_{H5}\cdot H_{5i} + \hat\beta_{Ph}\cdot Ph_i + \hat\beta_{Pm}\cdot Pm_i + \hat\beta_C\cdot C_i + \hat\beta_L\cdot L_i + \hat\beta_{D1}\cdot D_{1i} + \hat\beta_{D2}\cdot D_{2i} + \hat\beta_{D3}\cdot D_{3i} + \hat\beta_{D4}\cdot D_{4i} + \hat\beta_E\cdot E_i + \hat\beta_{IPm}\cdot I_i\cdot Pm_i + \hat\beta_{CPm}\cdot C_i\cdot Pm_i 
-$$
+logit(\pi_i) = \hat\beta_0 + \hat\beta_I\cdot I_i + \hat\beta_{H1}\cdot H_{1i} + \hat\beta_{H2}\cdot H_{2i} + \hat\beta_{H3}\cdot H_{3i} + \hat\beta_{H4}\cdot H_{4i} + \hat\beta_{H5}\cdot H_{5i} + \hat\beta_{Ph}\cdot Ph_i +$$
+$$+ \hat\beta_{Pm}\cdot Pm_i + \hat\beta_C\cdot C_i + \hat\beta_L\cdot L_i + \hat\beta_{D1}\cdot D_{1i} + \hat\beta_{D2}\cdot D_{2i} + \hat\beta_{D3}\cdot D_{3i} + \hat\beta_{D4}\cdot D_{4i} + \hat\beta_E\cdot E_i + \hat\beta_{IPm}\cdot I_i\cdot Pm_i + \hat\beta_{CPm}\cdot C_i\cdot Pm_i$$
+
+```{r, eval=TRUE}
+
+# x <- summary(modelo_logit_3)
+x <- summary(modelo_logit)
+
+# tabla1 <- data.frame(Efecto = c("Intercepto", "Ingreso", "Estado residencial:BB",
+#                       "Estado residencial:BC", "Estado residencial:BD",
+#                       "Estado residencial:BE","Estado residencial:BF",
+#                       "Teléfono Fijo:Válido","Teléfono Móvil:Válido"),
+#            Coeficiente = modelo_logit_3$coefficients[1:9],row.names = NULL,
+#            LI = modelo_logit_3$coefficients[1:9] - x$coefficients[1:9,2]*1.96, 
+#            LS = modelo_logit_3$coefficients[1:9] + x$coefficients[1:9,2]*1.96
+#            )
+# 
+# tabla2 <- data.frame(Efecto = c("Otra tarjeta:Si", "Límite propuesto", "Sistema Operativo:MacOS", "Sistema Operativo:Otro", "Sistema Operativo:Windows", "Sistema Operativo:OSx11", "N° de Emails Distintos_8w","Ingreso::Teléfono Móvil:Válido", "Otra tarjeta:Si::Teléfono Móvil:Válido"),
+#            Coeficiente = modelo_logit_3$coefficients[10:18],row.names = NULL,
+#            LI = modelo_logit_3$coefficients[10:18] - x$coefficients[10:18,2]*1.96, 
+#            LS = modelo_logit_3$coefficients[10:18] + x$coefficients[10:18,2]*1.96
+#            )
+
+
+
+tabla1 <- data.frame(Beta = c("$\\hat\\beta_0$","$\\hat\\beta_{I}$", "$\\hat\\beta_{H1}$", "$\\hat\\beta_{H2}$", "$\\hat\\beta_{H3}$", "$\\hat\\beta_{H4}$", "$\\hat\\beta_{H5}$", "$\\hat\\beta_{Ph}$"),
+                     Efecto = c("Intercepto", "Ingreso", "Estado residencial:BB",
+                      "Estado residencial:BC", "Estado residencial:BD",
+                      "Estado residencial:BE","Estado residencial:BF",
+                      "Teléfono fijo:Válido"),
+           Coeficiente = modelo_logit$coefficients[1:8],row.names = NULL,
+           LI = modelo_logit$coefficients[1:8] - x$coefficients[1:8,2]*1.96, 
+           LS = modelo_logit$coefficients[1:8] + x$coefficients[1:8,2]*1.96
+           )
+
+tabla2 <- data.frame(Beta = c("$\\hat\\beta_{Pm}$", "$\\hat\\beta_{C}$", "$\\hat\\beta_{L}$", "$\\hat\\beta_{D1}$", "$\\hat\\beta_{D2}$", "$\\hat\\beta_{D3}$", "$\\hat\\beta_{D4}$", "$\\hat\\beta_{E}$"),
+                     Efecto = c("Teléfono móvil:Válido", "Otra tarjeta:Si", "Límite propuesto", "Sistema operativo:MacOS", "Sistema operativo:Otro", "Sistema operativo:Windows", "Sistema operativo:OSx11", "N° de emails distintos (8 sem)"),
+           Coeficiente = modelo_logit$coefficients[9:16],row.names = NULL,
+           LI = modelo_logit$coefficients[9:16] - x$coefficients[9:16,2]*1.96, 
+           LS = modelo_logit$coefficients[9:16] + x$coefficients[9:16,2]*1.96
+           )
+
+```
+
+
+```{r}
+#| tbl-cap: "Coesficientes estimados del modelo ajustado"
+
+knitr::kable(rbind(tabla1, tabla2), digits = 3)
+```
 
 <!-- ### Interpretacion de los coeficientes del modelo -->
 
@@ -715,7 +861,9 @@ $$
 ### Evaluación de la componente sistemática
 
 
-```{r}
+```{r analisis de residuos modelo con interacciones, eval=FALSE}
+#| fig-cap: "Gráfico de residuos cuantil vs. las probabilidades estimadas"
+
 # Residuos cuantil
 rQ.logit <- qresid(modelo_logit_3)
 
@@ -746,18 +894,42 @@ G1 <- ggplot(data_enlaces, aes(y = rQ.logit, x = fitted(modelo_logit_3))) +
 G1
 ```
 
+
+```{r analisis de residuos modelo sin interacciones}
+#| fig-cap: "Gráfico de residuos cuantil vs. las probabilidades estimadas"
+
+# Residuos cuantil
+rQ.logit <- qresid(modelo_logit)
+
+# Mu estimado
+mu_logit <- fitted(modelo_logit)
+
+### Gráfico de residuos cuantil vs. probabilidades estimadas (ajuste logit)
+G1 <- ggplot(data_enlaces, aes(y = rQ.logit, x = fitted(modelo_logit))) + 
+  geom_point(fill = "orange", shape = 21, size = 3, alpha = 0.4) +
+  geom_hline(yintercept = 0) + 
+  # ylim(-3, 3) + 
+  geom_hline(yintercept = -3, linetype = "dashed") + 
+  geom_hline(yintercept =  3, linetype = "dashed") +
+  labs(x = expression(hat(pi)), y = "Residuos cuantil") +
+  theme_minimal()
+
+G1
+```
+
 Dado que no se ve ningún patrón y ningun punto se escapa de las bandas se puede decir que la componente sistematica seleccionada es adecuada.
 
 ### Comprobación de la distribución propuesta
 
 ```{r}
+#| fig-cap: "Gráfico probabilístico normal con residuos cuantil"
 
 # Gráfico QQ
 ggplot(data_enlaces, aes(sample = rQ.logit)) +
   stat_qq(distribution = qnorm, fill = "orange", shape = 21, size = 3, alpha = 0.4) +
   stat_qq_line() +
   annotate(geom = "label", label = paste("Test de Normalidad Shapiro-Wilks\n p-value:", round(shapiro.test(rQ.logit)$p.value, 2)), x = 0.9, y = -1.5, fill = "lightblue1") +
-  labs(title = "Gráfico probabilístico normal con residuos cuantil",  x = "Cuantiles teóricos", y = "Cuantiles de los residuos cuantil") +
+  labs(x = "Cuantiles teóricos", y = "Cuantiles de los residuos cuantil") +
   theme_minimal()
 
 
@@ -769,51 +941,11 @@ Viendo el gráfico y el test de Shapiro-Wilks para la normalidad de los errores,
 # Interpretaciones
 
 
-```{r, eval=TRUE}
-
-# exp(modelo_logit_3$coefficients["has_other_cards1"])
-# 
-# exp(modelo_logit_3$coefficients["phone_home_valid1"])
-# 
-# exp(modelo_logit_3$coefficients["proposed_credit_limit2000"])
-
-# exp_coef <- exp(modelo_logit_3$coefficients)
-
-x <- summary(modelo_logit_3)
-
-tabla1 <- data.frame(Efecto = c("Intercepto", "Ingreso", "Estado residencial:BB",
-                      "Estado residencial:BC", "Estado residencial:BD",
-                      "Estado residencial:BE","Estado residencial:BF",
-                      "Teléfono Fijo:Válido","Teléfono Móvil:Válido"),
-           Coeficiente = modelo_logit_3$coefficients[1:9],row.names = NULL,
-           LI = modelo_logit_3$coefficients[1:9] - x$coefficients[1:9,2]*1.96, 
-           LS = modelo_logit_3$coefficients[1:9] + x$coefficients[1:9,2]*1.96
-           )
-
-tabla2 <- data.frame(Efecto = c("Otra tarjeta:Si", "Límite propuesto", "Sistema Operativo:MacOS", "Sistema Operativo:Otro", "Sistema Operativo:Windows", "Sistema Operativo:OSx11", "N° de Emails Distintos_8w","Ingreso::Teléfono Móvil:Válido", "Otra tarjeta:Si::Teléfono Móvil:Válido"),
-           Coeficiente = modelo_logit_3$coefficients[10:18],row.names = NULL,
-           LI = modelo_logit_3$coefficients[10:18] - x$coefficients[10:18,2]*1.96, 
-           LS = modelo_logit_3$coefficients[10:18] + x$coefficients[10:18,2]*1.96
-           )
-
-# x$coefficients[1:9,2] 
-# colnames(x$cov.unscaled)
-x$cov.unscaled[1,1]
-```
-
-
-\newpage
-
-```{r}
-knitr::kable(rbind(tabla1, tabla2), digits = 3)
-```
-
-
-```{r}
+```{r RO modelo con interacciones, eval=FALSE}
 data.frame(
   RO = c(
     "Límite propuesto()",
-    "Teléfono Fijo:Válido",
+    "Teléfono fijo:Válido",
     "Ingreso(Teléfono Móvil:Válido)",
     "Ingreso(Teléfono Móvil:No Válido)",
     "Otra tarjeta:Si(Teléfono Móvil:Válido)",
@@ -847,19 +979,50 @@ data.frame(
     )
   
 )
-
-x$cov.unscaled["proposed_credit_limit","proposed_credit_limit"]
-colnames(x$cov.unscaled)
 ```
 
 
+```{r RO modelo sin interacciones}
+#| tbl-cap: "Razones de odds del modelo ajustado"
 
+tabla_ro <- data.frame(
+  RO = c(
+    "Límite propuesto",
+    "Teléfono fijo:Válido",
+    "Ingreso",
+    "Tenencia otra tarjeta"
+  ),
+  Estimacion = c(
+                 exp(as.numeric(modelo_logit$coefficients["proposed_credit_limit"])*100),
+                 exp(as.numeric(modelo_logit$coefficients["phone_home_valid1"])),
+                 exp(as.numeric(modelo_logit$coefficients["income"])*0.1),
+                 exp(as.numeric(modelo_logit$coefficients["has_other_cards1"]))
+                 ),
+  LI = c(
+    exp(as.numeric(modelo_logit$coefficients["proposed_credit_limit"])*100 - 1.96 * 100 * x$coefficients["proposed_credit_limit",2]),
+    exp(as.numeric(modelo_logit$coefficients["phone_home_valid1"]) - 1.96 * x$coefficients["phone_home_valid1",2]),
+    exp(as.numeric(modelo_logit$coefficients["income"])*0.1 - 1.96 * 0.1 * x$coefficients["income",2]),
+    exp(as.numeric(modelo_logit$coefficients["has_other_cards1"]) - 1.96 * x$coefficients["has_other_cards1",2])
+    ),
+  LS = c(
+    exp(as.numeric(modelo_logit$coefficients["proposed_credit_limit"])*100 + 1.96 * 100 * x$coefficients["proposed_credit_limit",2]),
+    exp(as.numeric(modelo_logit$coefficients["phone_home_valid1"]) + 1.96 * x$coefficients["phone_home_valid1",2]),
+    exp(as.numeric(modelo_logit$coefficients["income"])*0.1 + 1.96 * 0.1 * x$coefficients["income",2]),
+    exp(as.numeric(modelo_logit$coefficients["has_other_cards1"]) + 1.96 * x$coefficients["has_other_cards1",2])
+    )
+  
+)
 
-<!-- La chance de que un cliente comita fraude dado que tiene otra tarjeta en el mismo banco es un 68% menor que un cliente que no tiene, cuando el resto de las variables permanecen constantes. -->
+knitr::kable(tabla_ro, digits = 4)
+```
 
-Del mismo modo, un cliente que proporciono un telefono fijo válido tiene una chance de cometer fraude un 71% menor que uno que proporciono uno no válido, cuando el resto de las variables permanecen constantes.
+La chance de que un cliente cometa fraude aumenta entre un 5% y un 18% cuando el límite del crédito propuesto aumenta en 100 unidades monetarias, cuando las demás variables son constantes.
 
-A medida que el crédito límite propuesto aumenta en mil unidades monetarias, la chance de que un cliente cometa fraude aumenta un 191%, manteniendo el resto de variables fijas. VARIFICAR SI ES LINEAL O NO
+A su vez, cuando el cliente proporciona un telefono fijo válido, la chance de que este cometa fraude es como mínimo un 41% y como máximo un 88% menor que la de una persona que no proporcionó un telefono fijo válido, cuando el resto de las variables son constantes.
+
+Cuando el ingreso del cliente aumenta en un decil, la chance de que cometa fraude aumenta entre un 12% y un 50%, cuando las variables son constantes.
+
+Los clientes que tienen otra tarjeta en el mismo banco tienen una chance de cometer fraude entre un 15% y un 86% menor que aquellos que no tienen, cuando el resto de las variables son constantes.
 
 Las características de las personas más propensas a cometer fraude son:
 
@@ -877,14 +1040,14 @@ Las características de las personas más propensas a cometer fraude son:
 
 - Sistema operativo usado  macOS
 
-- 2 emails registados en la página del banco en las últimas 8 semanas
+- 2 emails registrados en la página del banco en las últimas 8 semanas
 
 
 Las características de las personas menos propensas a cometer fraude son:
 
 - Ingreso Bajo
 
-- Estado residencial del aplicante "BD"
+- Estado residencial del aplicante "BE"
 
 - Número de teléfono fijo proporcionado válido
 
@@ -892,20 +1055,20 @@ Las características de las personas menos propensas a cometer fraude son:
 
 - Posee otra tarjeta en el mismo banco
 
-- Límite del crédito propuesto Bajo
+- Límite del crédito propuesto bajo
 
-- Sistema operativo usado OSx11
+- Sistema operativo usado otros
 
-- Un solo email registado en la página del banco en las últimas 8 semanas
-
-
+- Un solo email registrado en la página del banco en las últimas 8 semanas
 
 
 
 # Capacidad predictiva
 
 ```{r}
-curva_roc_knn <- roc(response = data$fraud_bool, predictor = fitted(modelo_logit_3), plot = F)
+#| fig-cap: "Curva ROC del modelo ajustado"
+
+curva_roc_knn <- roc(response = data$fraud_bool, predictor = fitted(modelo_logit), plot = F)
 
 best_knn <- coords(curva_roc_knn, "local maximas")[7,]
 
@@ -929,42 +1092,55 @@ data.frame(especificidad = curva_roc_knn$specificities,
 
 ```
 
-Se decidió utilizar el mejor punto de corte que maximice la especificidad garantizando una sensibilidad de al menos un 90%, esto para evitar el máximo número de fraudes posibles sin afectar a los clientes legítimos.
+Se decidió elegir el mejor punto de corte como aquel que maximiza la especificidad garantizando una sensibilidad de al menos un 90%, esto para evitar el máximo número de fraudes posibles sin afectar a los clientes legítimos.
 
-
-```{r}
-
-# Agrego las ordinales
-data_test <- data_test |> 
-  mutate(
-    income = as.numeric(income)/10,
-    proposed_credit_limit = case_when(as.numeric(proposed_credit_limit_cat) == 1 ~ 200,
-                                          as.numeric(proposed_credit_limit_cat) == 2 ~ 500,
-                                          as.numeric(proposed_credit_limit_cat) == 3 ~ 1000,
-                                          as.numeric(proposed_credit_limit_cat) == 4 ~ 1500,
-                                          T ~ 2000)
-  )
-
-
-prob_pred <- exp(predict(modelo_logit_3, newdata = data_test))/(1+exp(predict(modelo_logit_3, newdata = data_test)))
-
-fraud_pred <- factor(ifelse(prob_pred >= best_knn$threshold, 1, 0), levels = c(0,1))
-
-# confusionMatrix(fraud_pred, reference = data_test$fraud_bool, positive = "1")
-```
-
-
-```{r}
-
-curva_roc_knn <- roc(response = data$fraud_bool, predictor = fitted(modelo_logit), plot = F)
-
-best_knn <- coords(curva_roc_knn, "local maximas")[7,]
-
+```{r capacidad predictiva modelo sin interaccion}
 prob_pred <- exp(predict(modelo_logit, newdata = data_test))/(1+exp(predict(modelo_logit, newdata = data_test)))
 
 fraud_pred <- factor(ifelse(prob_pred >= best_knn$threshold, 1, 0), levels = c(0,1))
 
 # confusionMatrix(fraud_pred, reference = data_test$fraud_bool, positive = "1")
+
+matriz_confucion <- confusionMatrix(fraud_pred, reference = data_test$fraud_bool, positive = "1")
+```
+
+
+```{r capacidad predictiva modelo sin interaccion 2}
+#| fig-cap: "Matriz de confusión del modelo ajustado ante nuevos clientes"
+
+data.frame(matriz_confucion$table) |> 
+  mutate(Prediction = case_when(Prediction == 0 ~ "No fraude",
+                                T ~ "Fraude"),
+         Reference = case_when(Reference == 0 ~ "No fraude",
+                                T ~ "Fraude")) |> 
+  ggplot() +
+  aes(x = Prediction, y = Reference, fill = Freq, label = Freq) +
+  geom_tile(color = "black") +
+  geom_label() +
+  scale_fill_gradient(low = "#cfeac8", high = "#4db146") +
+  labs(x = "Valor Predicho", y = "Valor Observado",
+       caption = paste0("Precisión: ", round(matriz_confucion$overall[1], 2), "        |        ",
+                        "Sensibilidad: ", round(matriz_confucion$byClass[1], 2), "        |        ",
+                        "Especificidad: ", round(matriz_confucion$byClass[2], 2) 
+                        )) +
+  theme_bw() + 
+  theme(legend.position = "none",
+        plot.caption = element_text(hjust=0.5,size = 10))
+```
+
+Además, se quiso evaluar la capacidad predictiva del mismo modelo agregando 2 interacciones:
+
+```{r capacidad predictiva modelo con interaccion, eval=FALSE}
+
+#| fig-cap: "Matriz de confusión del modelo con interacciones ante nuevos clientes"
+
+curva_roc_knn <- roc(response = data$fraud_bool, predictor = fitted(modelo_logit_3), plot = F)
+
+best_knn <- coords(curva_roc_knn, "local maximas")[7,]
+
+prob_pred <- exp(predict(modelo_logit_3, newdata = data_test))/(1+exp(predict(modelo_logit_3, newdata = data_test)))
+
+fraud_pred <- factor(ifelse(prob_pred >= best_knn$threshold, 1, 0), levels = c(0,1))
 
 matriz_confucion <- confusionMatrix(fraud_pred, reference = data_test$fraud_bool, positive = "1")
 
@@ -986,7 +1162,7 @@ data.frame(matriz_confucion$table) |>
                         )) +
   theme_bw() + 
   theme(legend.position = "none",
-        plot.caption = element_text(hjust=0.5,size = 12))
+        plot.caption = element_text(hjust=0.5,size = 11))
 ```
 
-
+Observando las matrices de confusión y las métricas de comparación, haciendo énfasis en la sensibilidad, se puede notar que el modelo de efectos principales tiene una mejor capacidad preditiva en base al objetivo propuesto que el modelo que tiene 2 efectos más. Esto puede adjudicarse al sobreajuste que el modelo tiene sobre los datos que se usaron como entrenamiento, ya que si bien un modelo con muchos efectos va a predecir mejor sobre los datos que modela, ante nuevos datos el ajuste no será tan bueno.

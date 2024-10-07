@@ -4,7 +4,7 @@ format:
   revealjs:
     theme: dark
     slide-number: true
-    logo: logounr.png
+    logo: Imgs/logounr.png
 author: "Gamboa Nicolas - Roncaglia Andrés - Santini Franco"
 echo: false
 warning: false
@@ -35,7 +35,8 @@ theme_set(theme_bw() +
                   axis.title = element_text(color = "#bcc3c7", size = 13),
                   title = element_text(color = "#bcc3c7", size = 16),
                   legend.text = element_text(color = "#bcc3c7", size = 11),
-                  legend.title = element_text(color = "#bcc3c7", size = 13)))
+                  legend.title = element_text(color = "#bcc3c7", size = 13)
+                  ))
 
 knitr::opts_chunk$set(fig.align = "center")
 
@@ -167,8 +168,6 @@ El fraude con tarjetas de crédito es una de las principales amenazas que sufren
 
 ##
 
-#### Variables más relevantes
-
 - `phone_mobile_valid`: Validez del telefono movil provisto
 
 - `has_other_cards`: Indicador de si la persona tiene otra tarjeta en el mismo banco
@@ -190,20 +189,22 @@ El fraude con tarjetas de crédito es una de las principales amenazas que sufren
 ((data |> 
   filter(fraud_bool == 0) |> 
   ggplot() +
-  aes(x = income, y = (after_stat(count))/sum(after_stat(count)))+
+  aes(x = as.numeric(income)/10, y = (after_stat(count))/sum(after_stat(count)))+
   geom_bar(color = "black", fill = "#284B63") +
   xlab(label = "Ingreso anual") +
   ylab(label = "Proporción") +
+  scale_x_continuous(breaks = seq(0.1,0.9,0.1)) +
   scale_y_continuous(limits = c(0,0.6)) +
   ggtitle("No fraude")) +
 (data |> 
    filter(fraud_bool == 1) |> 
    ggplot() +
-   aes(x = income, y = (after_stat(count))/sum(after_stat(count)))+
+   aes(x = as.numeric(income)/10, y = (after_stat(count))/sum(after_stat(count)))+
    geom_bar(color = "black", fill = "#F15946") +
    xlab(label = "Ingreso anual") +
    ylab(label = "Proporción") +
    scale_y_continuous(limits = c(0,0.6)) +
+   scale_x_continuous(breaks = seq(0.1,0.9,0.1)) +
    ggtitle("Fraude"))) + plot_layout(axes = "collect") +
   (data |> 
   filter(fraud_bool == 0) |> 
@@ -230,24 +231,6 @@ El fraude con tarjetas de crédito es una de las principales amenazas que sufren
 ```{r}
 
 (data |> 
-  filter(fraud_bool == 0) |> 
-  ggplot() +
-  aes(x = name_email_similarity, y = after_stat(density))+
-  geom_histogram(bins = 15, color = "black", fill = "#284B63") +
-  scale_y_continuous(limits = c(0,3)) +
-  xlab(label = "Similitud nombre-email") +
-  ylab(label = "Densidad") +
-  ggtitle("No fraude")) +
-(data |> 
-  filter(fraud_bool == 1) |> 
-  ggplot() +
-  aes(x = name_email_similarity, y = after_stat(density))+
-  geom_histogram(bins = 15, color = "black", fill = "#F15946") +
-  scale_y_continuous(limits = c(0,3)) +
-  xlab(label = "Similitud nombre-email") +
-  ylab(label = "Densidad") +
-  ggtitle("Fraude")) + plot_layout(axes = "collect") +
-  (data |> 
   filter(fraud_bool == 0) |> 
   ggplot() +
   aes(x = payment_type, y = (after_stat(count))/sum(after_stat(count)))+

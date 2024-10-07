@@ -5,7 +5,7 @@ format:
     theme: dark
     slide-number: true
     logo: logounr.png
-author: "Gamboa Nicolás - Roncaglia Andrés - Santini Franco"
+author: "Gamboa Nicolas - Roncaglia Andrés - Santini Franco"
 echo: false
 warning: false
 message: false

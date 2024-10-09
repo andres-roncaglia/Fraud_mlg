@@ -34,7 +34,7 @@ knitr::include_graphics("Imgs/unr.jpeg")
 \vspace{1cm}
 
 \Large
-**Pradicción de fraude financiero**
+**Predicción de fraude financiero**
 
 
 \vspace{0.3cm}
@@ -257,7 +257,15 @@ data_test <- data_test |> select(-n, -proposed_credit_limit, -X) |>
                                           proposed_credit_limit_cat_ord == 2 ~ 500,
                                           proposed_credit_limit_cat_ord == 3 ~ 1000,
                                           proposed_credit_limit_cat_ord == 4 ~ 1500,
-                                          T ~ 2000))
+                                          T ~ 2000),
+         housing_status = case_when(housing_status %in% c("BD", "BE", "BF") ~ "Otro",
+                               T ~ housing_status),
+    
+          device_os = case_when(device_os == "x11" ~ "other",
+                          T ~ device_os),
+          customer_age = factor(case_when(customer_age %in% c(10,20) ~ "<20",
+                             customer_age %in% c(60,70) ~ ">60",
+                             T ~ as.character(customer_age))))
 
 
 
@@ -268,6 +276,27 @@ data <- data |> select(-n, -proposed_credit_limit, -X)
 ```
 
 
+```{r}
+t1 <- data |> 
+  group_by(fraud_bool) |> 
+  summarise(n = n())
+
+data |> 
+  ggplot() +
+  aes(x = fraud_bool, y = (after_stat(count))/sum(after_stat(count)))+
+  geom_bar(color = "black", fill = c("#284B63", "#F15946")) +
+  xlab(label = "Fraude") +
+  ylab(label = "Proporción") +
+  scale_y_continuous(limits = c(0,1)) +
+  scale_x_discrete(labels = c("0" = "No", "1" = "Sí")) +
+  geom_text(aes(label = after_stat(count), 
+                y = after_stat(count)/sum(after_stat(count)) + 0.02), 
+            stat = "count", 
+            size = 5,
+            vjust = 0)
+```
+
+
 
 ```{r}
 #| fig-cap: "Distribución del ingreso anual según si la transacción es fraudulenta o no"
@@ -275,7 +304,7 @@ data <- data |> select(-n, -proposed_credit_limit, -X)
 ((data |> 
   filter(fraud_bool == 0) |> 
   ggplot() +
-  aes(x = income, y = (after_stat(count))/sum(after_stat(count)))+
+  aes(x = as.numeric(income)/10, y = (after_stat(count))/sum(after_stat(count)))+
   geom_bar(color = "black", fill = "#284B63") +
   xlab(label = "Ingreso anual") +
   ylab(label = "Proporción") +
@@ -285,7 +314,7 @@ data <- data |> select(-n, -proposed_credit_limit, -X)
 (data |> 
    filter(fraud_bool == 1) |> 
    ggplot() +
-   aes(x = income, y = (after_stat(count))/sum(after_stat(count)))+
+   aes(x = as.numeric(income)/10, y = (after_stat(count))/sum(after_stat(count)))+
    geom_bar(color = "black", fill = "#F15946") +
    xlab(label = "Ingreso anual") +
    ylab(label = "Proporción") +
@@ -301,23 +330,18 @@ Se puede observar que las personas que cometieron fraude tienden a tener un ingr
 #| fig-cap: "Distribución del índice de similitud entre en nombre del solicitante y el nombre en el email según si la transacción es fraudulenta o no"
 
 (data |> 
-  filter(fraud_bool == 0) |> 
+   group_by(fraud_bool, device_distinct_emails_8w) |> 
+   summarise(prop = n()) |> 
+   mutate(prop = prop/sum(prop)) |> 
   ggplot() +
-  aes(x = name_email_similarity, y = after_stat(density))+
-  geom_histogram(bins = 15, color = "black", fill = "#284B63") +
-  scale_y_continuous(limits = c(0,5)) +
-  xlab(label = "Similitud nombre-email") +
+  aes(x = device_distinct_emails_8w, y = prop, fill = fraud_bool, group = fraud_bool)+
+  geom_bar(color = "black", position = "dodge", stat = "identity") +
+  xlab(label = "Número de emails distintos en la página del banco en las últimas 8 semanas") +
   ylab(label = "Proporción") +
-  ggtitle("No fraude")) +
-(data |> 
-  filter(fraud_bool == 1) |> 
-  ggplot() +
-  aes(x = name_email_similarity, y = after_stat(density))+
-  geom_histogram(bins = 15, color = "black", fill = "#F15946") +
-  scale_y_continuous(limits = c(0,5)) +
-  xlab(label = "Similitud nombre-email") +
-  ylab(label = "Proporción") +
-  ggtitle("Fraude")) + plot_layout(axes = "collect")
+  labs(fill = "Fraude") +
+  scale_fill_manual(values = c("#284B63","#F15946"),labels = c("No","Si")) +
+  scale_x_continuous(breaks = c(1,2)) +
+  scale_y_continuous(limits = c(0,1)))
 ```
 
 Las transacciones realizadas con emails no muy similares al nombre real de la persona parecen ser más propensas a ser fraudulentas. 
@@ -335,7 +359,12 @@ Las transacciones realizadas con emails no muy similares al nombre real de la pe
   xlab(label = "Tipo del plan de pago") +
   ylab(label = "Proporción") +
   scale_y_continuous(limits = c(0,0.8)) +
-  ggtitle("No fraude")) +
+  ggtitle("No fraude") +
+  geom_text(aes(label = after_stat(count), 
+                y = after_stat(count)/sum(after_stat(count)) + 0.02), 
+            stat = "count", 
+            size = 5,
+            vjust = 0)) +
 (data |> 
   filter(fraud_bool == 1) |> 
   ggplot() +
@@ -344,7 +373,12 @@ Las transacciones realizadas con emails no muy similares al nombre real de la pe
   xlab(label = "Tipo del plan de pago") +
   ylab(label = "Proporción") +
   scale_y_continuous(limits = c(0,0.8)) +
-  ggtitle("Fraude")) + plot_layout(axes = "collect")
+  ggtitle("Fraude") +
+  geom_text(aes(label = after_stat(count), 
+                y = after_stat(count)/sum(after_stat(count)) + 0.02), 
+            stat = "count", 
+            size = 5,
+            vjust = 0)) + plot_layout(axes = "collect")
 ```
 
 En general, las personas que cometen fraude parecen preferir los métodos de pago "AB" y "AC" por encima del resto, al contrario de las personas que operan de manera legítima que prefieren de igual manera los tipos de pago "AA", "AB" y "AC". Se puede notar también que la forma de pago "AE" no es muy popular.
@@ -397,28 +431,41 @@ Se puede destacar en este gráfico que las personas que cometen fraude son liger
 En cuanto a la tenencia de otra tarjeta en el mismo banco, suele ser común no poseer otra, sin embargo las personas que operan de forma legal se inclinan a tener más de una tarjeta un poco más que aquellos que cometen fraude.
 
 ```{r}
-#| fig-cap: "Proporción de la locación de la solicitud según si la transacción es fraudulenta o no"
+#| fig-cap: "Proporción del sistema operativo del dispositivo según si la transacción es fraudulenta o no"
 
 (data |> 
-   group_by(fraud_bool, foreign_request) |> 
-   summarise(prop = n()) |> 
-   mutate(prop = prop/sum(prop)) |> 
+  filter(fraud_bool == 0) |> 
   ggplot() +
-  aes(x = foreign_request, y = prop, fill = fraud_bool, group = fraud_bool)+
-  geom_bar(color = "black", position = "dodge", stat = "identity") +
-  xlab(label = "Solicitud extranjera") +
+  aes(x = device_os, y = after_stat(count)/sum(after_stat(count)))+
+  geom_bar(color = "black", fill = "#284B63") +
+  xlab(label = "Sistema operativo del dispositivo utilizado") +
   ylab(label = "Proporción") +
-  labs(fill = "Fraude") +
-  scale_fill_manual(values = c("#284B63","#F15946"),labels = c("No","Si")) +
-  scale_x_discrete(labels = c("0" = "No","1" = "Si")) +
-  scale_y_continuous(limits = c(0,1)))
+  geom_text(aes(label = after_stat(count), 
+                y = after_stat(count)/sum(after_stat(count)) + 0.02), 
+            stat = "count", 
+            size = 5,
+            vjust = 0) +
+  scale_y_continuous(limits = c(0,0.65))+
+  ggtitle("No fraude")) +
+(data |> 
+  filter(fraud_bool == 1) |> 
+  ggplot() +
+  aes(x = device_os, y = after_stat(count)/sum(after_stat(count)))+
+  geom_bar(color = "black", fill = "#F15946") +
+  xlab(label = "Sistema operativo del dispositivo utilizado") +
+  ylab(label = "Proporción") +
+  scale_y_continuous(limits = c(0,0.65))+
+  ggtitle("Fraude") +
+   geom_text(aes(label = after_stat(count), 
+                y = after_stat(count)/sum(after_stat(count)) + 0.02), 
+            stat = "count", 
+            size = 5,
+            vjust = 0)) + plot_layout(axes = "collect")
   
 ```
 
 
-Se puede observar que las personas que cometen fraude, parecen hacer más solicitudes del exterior que las personas que no cometen fraude, aunque la diferencia parece ser sutil.
-
-
+Se puede observar que las personas que cometen fraude, parecen utilizar Windows en mayor proporción que las personas que no cometen fraude. Dado que muy pocos clientes utilizan el sistema operativo "x11" se decidió agregarlo a la categoría "other".
 
 
 ```{r}
@@ -442,32 +489,40 @@ Se puede observar que las personas que cometen fraude, parecen hacer más solici
 También se puede destacar que las operaciones fraudulentas parecen ser más comunes cuando el dominio del email del solicitante es gratuito que cuando es pago.
 
 ```{r}
-#| fig-cap: "Distribución del score de riesgo interno según si la transacción es fraudulenta o no"
+#| fig-cap: "Estado residencial del cliente según si la transacción es fraudulenta o no"
 
 (data |> 
-    filter(fraud_bool == 0) |> 
-    ggplot() +
-    aes(x = credit_risk_score, y = after_stat(count)/sum(after_stat(count)))+
-    geom_histogram(fill = "#284B63", color = "black", bins = 20)+
-    scale_y_continuous(limits = c(0, 0.2)) +
-    scale_x_continuous(limits = c(-200, 400)) +
-    xlab(label = "Score de riesgo crediticio") +
-    ylab(label = "Proporción") +
-    ggtitle("No fraude")) +
+  filter(fraud_bool == 0) |> 
+  ggplot() +
+  aes(x = housing_status, y = after_stat(count)/sum(after_stat(count)))+
+  geom_bar(color = "black", fill = "#284B63") +
+  xlab(label = "Estado residencial del cliente") +
+  ylab(label = "Proporción") +
+  geom_text(aes(label = after_stat(count), 
+                y = after_stat(count)/sum(after_stat(count)) + 0.02), 
+            stat = "count", 
+            size = 5,
+            vjust = 0) +
+  scale_y_continuous(limits = c(0,0.65))+
+  ggtitle("No fraude")) +
 (data |> 
-    filter(fraud_bool == 1) |> 
-    ggplot() +
-    aes(x = credit_risk_score, y = after_stat(count)/sum(after_stat(count)))+
-    geom_histogram(fill = "#F15946", color = "black", bins = 20)+
-    scale_y_continuous(limits = c(0, 0.2)) +
-    scale_x_continuous(limits = c(-200, 400)) +
-    xlab(label = "Score de riesgo crediticio") +
-    ylab(label = "Proporción") +
-    ggtitle("Fraude")) + plot_layout(axes = "collect")
+  filter(fraud_bool == 1) |> 
+  ggplot() +
+  aes(x = housing_status, y = after_stat(count)/sum(after_stat(count)))+
+  geom_bar(color = "black", fill = "#F15946") +
+  xlab(label = "Estado residencial del cliente") +
+  ylab(label = "Proporción") +
+  scale_y_continuous(limits = c(0,0.65))+
+  ggtitle("Fraude") +
+   geom_text(aes(label = after_stat(count), 
+                y = after_stat(count)/sum(after_stat(count)) + 0.02), 
+            stat = "count", 
+            size = 5,
+            vjust = 0)) + plot_layout(axes = "collect")
 ```
 
 
-La distribución del score de riesgo para las personas que cometen fraude es simétrica y centrada alrededor de 200, mientras que la distribución del score de riesgo para las personas que no cometen fraude parece ser más asimétrica y tener una media menor.
+La distribución del score de riesgo para las personas que cometen fraude es simétrica y centrada alrededor de 200, mientras que la distribución del score de riesgo para las personas que no cometen fraude parece ser más asimétrica y tener una media menor. Dado que hay pocos datos en las categorías "BD", "BE" y "BF" se decidió agruparlas en una sola categoría llamada "Otros".
 
 
 
@@ -499,12 +554,23 @@ Por lo general, cuando las transacciones son fraudulentas la persona decide no m
 Teniendo todo esto en cuenta se buscó un modelo que ajuste bien a los datos, para esto primero se realizó una selección de variables paso a paso, obteniendo el siguiente modelo:
 
 ```{r}
-
+data <- data |> 
+  mutate(
+    housing_status = case_when(housing_status %in% c("BD", "BE", "BF") ~ "Otro",
+                               T ~ housing_status),
+    
+    device_os = case_when(device_os == "x11" ~ "other",
+                          T ~ device_os),
+    customer_age = factor(case_when(customer_age %in% c(10,20) ~ "<20",
+                             customer_age %in% c(60,70) ~ ">60",
+                             T ~ as.character(customer_age)))
+  )
 # Modelado ---------------------
 
 model <- glm(fraud_bool ~ ., data = data, family = binomial(link = "logit"), na.action = na.omit)
 
 # step(model, direction = "both", trace=0)
+# Customer age esta muy al limite asi que decidimos sacarla
 
 modelo_logit <- glm(fraud_bool ~ income + housing_status + 
     phone_home_valid + phone_mobile_valid + has_other_cards + 
@@ -521,54 +587,139 @@ logit(\pi_i) = \beta_0 + \beta_I\cdot I_i + \beta_{H1}\cdot H_{1i} + \beta_{H2}\
 $$
 $$+ \beta_{Pm}\cdot Pm_i +  \beta_C\cdot C_i + \beta_L\cdot L_i + \beta_{D1}\cdot D_{1i} + \beta_{D2}\cdot D_{2i} + \beta_{D3}\cdot D_{3i} + \beta_{D4}\cdot D_{4i} + \beta_E\cdot E_i$$
 
-Luego, al tener 2 variables continuas, se decidió comprobar la linealidad de estas:
+Luego, al tener 2 variables continuas (ingreso y credito límite propuesto), se decidió comprobar la linealidad de estas. Para testear esto se implementó el test de razón de verosimilitud, en el que se compara el modelo que considera a la variable como ordinal (asignando scores) y el modelo que considera a la variable como categórica (asignando variables de diseño).
+
+##### Ingreso
+
+Para crear los modelos se tuvo que categorizar la variable ingreso en 4 categorías con aproximadamente la misma cantidad de observaciones. Las variables creadas son tales que:
+
+| Ingreso    | I1 | I2 | I3 | S |
+|------------|:--:|:--:|:--:|:-:|
+| [0; 0.3]   |  0 |  0 |  0 | 1 |
+| (0.3; 0.6] |  1 |  0 |  0 | 2 |
+| (0.6; 0.8] |  0 |  1 |  0 | 3 |
+| (0.8; 0.9] |  0 |  0 |  1 | 4 |
+
+Modelo ordinal: 
+$$
+logit(\pi_i) = \beta_0 + \beta_I\cdot S_i + \beta_{H1}\cdot H_{1i} + \beta_{H2}\cdot H_{2i} + \beta_{H3}\cdot H_{3i} + \beta_{H4}\cdot H_{4i} + \beta_{H5}\cdot H_{5i} + \beta_{Ph}\cdot Ph_i +
+$$
+$$+ \beta_{Pm}\cdot Pm_i +  \beta_C\cdot C_i + \beta_L\cdot L_i + \beta_{D1}\cdot D_{1i} + \beta_{D2}\cdot D_{2i} + \beta_{D3}\cdot D_{3i} + \beta_{D4}\cdot D_{4i} + \beta_E\cdot E_i$$
+
+Modelo categórico: 
+$$
+logit(\pi_i) = \beta_0 + \beta_{I_1}\cdot I_{1i} + \beta_{I_2}\cdot I_{2i} + \beta_{I_3}\cdot I_{3i} + \beta_{H1}\cdot H_{1i} + \beta_{H2}\cdot H_{2i} + \beta_{H3}\cdot H_{3i} + \beta_{H4}\cdot H_{4i} + \beta_{H5}\cdot H_{5i} + \beta_{Ph}\cdot Ph_i +
+$$
+$$+ \beta_{Pm}\cdot Pm_i +  \beta_C\cdot C_i + \beta_L\cdot L_i + \beta_{D1}\cdot D_{1i} + \beta_{D2}\cdot D_{2i} + \beta_{D3}\cdot D_{3i} + \beta_{D4}\cdot D_{4i} + \beta_E\cdot E_i$$
+
+Hipótesis: $H_0)$ La variable es lineal \ \ vs \ \ $H_1)$ La variable no es lineal
+
+Estadística: $G^2 = -2(Ln(L_{ord}) - Ln(L_{cat})) \underset{H_0}{\sim} \chi^2_{2}$
+
+Dado que el valor p resulta igual a $0.6906$ no se rechaza la hipótesis nula y por lo tanto se introduce la variable al modelo como lineal.
+
+##### Crédito límite propuesto
+
+Nuevamente, para realizar el test se tuvo que crear variables de diseño y de scores, las cuales son:
+
+| Límite cred. propuesto | L1 | L2 | L3 | L4 | S |
+|:----------------------:|:--:|:--:|:--:|:--:|:-:|
+| [0; 200]               |  0 |  0 |  0 |  0 | 1 |
+| (200; 500]             |  1 |  0 |  0 |  0 | 2 |
+| (500; 1000]            |  0 |  1 |  0 |  0 | 3 |
+| (1000; 1500]           |  0 |  0 |  1 |  0 | 4 |
+| (1500; 2000]           |  0 |  0 |  0 |  1 | 5 |
+
+Modelo ordinal: 
+$$
+logit(\pi_i) = \beta_0 + \beta_I\cdot I_i + \beta_{H1}\cdot H_{1i} + \beta_{H2}\cdot H_{2i} + \beta_{H3}\cdot H_{3i} + \beta_{H4}\cdot H_{4i} + \beta_{H5}\cdot H_{5i} + \beta_{Ph}\cdot Ph_i +
+$$
+$$+ \beta_{Pm}\cdot Pm_i +  \beta_C\cdot C_i + \beta_L\cdot S_i + \beta_{D1}\cdot D_{1i} + \beta_{D2}\cdot D_{2i} + \beta_{D3}\cdot D_{3i} + \beta_{D4}\cdot D_{4i} + \beta_E\cdot E_i$$
+
+Modelo categórico: 
+$$
+logit(\pi_i) = \beta_0 + \beta_{I_1}\cdot I_{i} + \beta_{H1}\cdot H_{1i} + \beta_{H2}\cdot H_{2i} + \beta_{H3}\cdot H_{3i} + \beta_{H4}\cdot H_{4i} + \beta_{H5}\cdot H_{5i} + \beta_{Ph}\cdot Ph_i +
+$$
+$$+ \beta_{Pm}\cdot Pm_i +  \beta_C\cdot C_i + \beta_{L_1}\cdot L_{1i}+ \beta_{L_2}\cdot L_{2i} + \beta_{L_3}\cdot L_{3i} + \beta_{L_4}\cdot L_{4i} + \beta_{D1}\cdot D_{1i} + \beta_{D2}\cdot D_{2i} + \beta_{D3}\cdot D_{3i} + \beta_{D4}\cdot D_{4i} + \beta_E\cdot E_i$$
+
+Hipótesis: $H_0)$ La variable es lineal \ \ vs \ \ $H_1)$ La variable no es lineal
+
+Estadística: $G^2 = -2(Ln(L_{ord}) - Ln(L_{cat})) \underset{H_0}{\sim} \chi^2_{2}$
+
+Dado que el valor p resulta igual a $0.1578$ no se rechaza la hipótesis nula y por lo tanto se introduce la variable al modelo como lineal.
 
 ```{r}
 
 # Linealidad de las variables ordinales 
 
-data <- data |> 
+data_linealidad <- data |> 
   mutate(
-    income_ord = as.numeric(income),
+    income = as.numeric(income)/10,
+    income_dummie = factor(case_when(income <= 0.3 ~ "hasta0.3",
+                           income <= 0.6 ~ "hasta0.6",
+                           income <= 0.8 ~ "hasta0.8",
+                           T ~ "0.9"
+                           )),
+    income_ord = factor(case_when(income/10 <= 0.3 ~ "hasta0.3",
+                           income <= 0.6 ~ "hasta0.6",
+                           income <= 0.8 ~ "hasta0.8",
+                           T ~ "0.9"
+                           ), levels = c("hasta0.3", "hasta0.6", "hasta0.8", "0.9")),
+    income_ord_2 = cut(as.numeric(income), breaks = c(-Inf,0.3,0.6,0.8,Inf), labels = F),
     proposed_credit_limit_cat_ord = as.numeric(proposed_credit_limit_cat)
   )
 
-model_income_ord <- glm(fraud_bool ~ income_ord + housing_status + 
+model_income_ord <- glm(fraud_bool ~ income_ord_2 + housing_status + 
     phone_home_valid + phone_mobile_valid + has_other_cards + 
     proposed_credit_limit_cat + device_os + device_distinct_emails_8w, 
-    data = data, 
+    data = data_linealidad, 
     family = binomial(link = "logit"), 
     na.action = na.omit)
 
+model_income_dummie <- glm(fraud_bool ~ income_dummie + housing_status + 
+    phone_home_valid + phone_mobile_valid + has_other_cards + 
+    proposed_credit_limit_cat + device_os + device_distinct_emails_8w, 
+    data = data_linealidad, 
+    family = binomial(link = "logit"), 
+    na.action = na.omit)
 
-linealidad <- anova(model_income_ord, modelo_logit)
+linealidad <- anova(model_income_ord, model_income_dummie)
 
-# pchisq(8.2587, 7,lower.tail = F)
+# pchisq(0.74044, 2,lower.tail = F) = 0.6905824
 
 # No rechazo H0 por lo que la variable ingreso es lineal
 
 model_cardlimit_ord <- glm(fraud_bool ~ income + housing_status + 
     phone_home_valid + phone_mobile_valid + has_other_cards + 
     proposed_credit_limit_cat_ord + device_os + device_distinct_emails_8w, 
-    data = data, 
+    data = data_linealidad, 
     family = binomial(link = "logit"), 
     na.action = na.omit)
 
-linealidad <- anova(model_cardlimit_ord, modelo_logit)
+model_cardlimit_cat <- glm(fraud_bool ~ income + housing_status + 
+    phone_home_valid + phone_mobile_valid + has_other_cards + 
+    proposed_credit_limit_cat + device_os + device_distinct_emails_8w, 
+    data = data_linealidad, 
+    family = binomial(link = "logit"), 
+    na.action = na.omit)
 
-# pchisq(4.8266, 3,lower.tail = F)
+linealidad <- anova(model_cardlimit_ord, model_cardlimit_cat)
+
+# pchisq(5.1985, 3,lower.tail = F)
 
 # No se rechaza h0 por lo que la variable es lineaaaaal
 
-data <- data |> 
+data <- data |>
   mutate(
-    income = income_ord/10,
+    income = as.numeric(income)/10,
+    proposed_credit_limit_cat_ord = as.numeric(proposed_credit_limit_cat),
     proposed_credit_limit = case_when(proposed_credit_limit_cat_ord == 1 ~ 200,
                                           proposed_credit_limit_cat_ord == 2 ~ 500,
                                           proposed_credit_limit_cat_ord == 3 ~ 1000,
                                           proposed_credit_limit_cat_ord == 4 ~ 1500,
                                           T ~ 2000)
   )
+
 ```
 
 ```{r}
@@ -585,7 +736,8 @@ modelo_logit <- glm(fraud_bool ~ income + housing_status +
 
 ```
 
-Además, se propucieron ciertas interacciones: 
+Además, se propusieron ciertas interacciones, más precisamente la interacción entre la validez del número de teléfono móvil brindado y la tenencia de otra tarjeta en el banco, y entre la validez del número de teléfono móvil brindado y el ingreso. Si bien estas resultaron significativas al realizar el test de razón de verosimilitud, al ya contar con muchas variables se decidió no incluirlas para no complejizar el modelo y su interpretabilidad. Sin embargo este modelo será utilizado más adelante como motivo de comparación con el modelo ajustado.
+
 
 ```{r}
 
@@ -631,8 +783,6 @@ modelo_logit_3 <- glm(fraud_bool ~ income + housing_status +
 <!-- logit(\pi_i) = \beta_0 + \beta_I\cdot I_i + \beta_{H1}\cdot H_{1i} + \beta_{H2}\cdot H_{2i} + \beta_{H3}\cdot H_{3i} + \beta_{H4}\cdot H_{4i} + \beta_{H5}\cdot H_{5i} + \beta_{Ph}\cdot Ph_i + \beta_{Pm}\cdot Pm_i + \beta_C\cdot C_i + \beta_L\cdot L_i + \beta_D\cdot D_i + \beta_E\cdot E_i + \beta_{IPm}\cdot I_i\cdot Pm_i + \beta_{CPm}\cdot C_i\cdot Pm_i  -->
 <!-- $$ -->
 
-Sin embargo se mantuvo el modelo lineal presentado anteriormente (AGREGAR REFERENCIA A LA ECUACION)
-
 Una vez definida la componente lineal se decidió comprobar el enlace:
 
 ```{r Comprobacion del enlace modelo con interaccion, eval=FALSE}
@@ -650,7 +800,7 @@ modelo_logit.2 <- glm(fraud_bool ~ income + housing_status +
     na.action = na.omit)
 
 
-# anova(modelo_logit_3, modelo_logit.2, test="LRT") 
+# anova(modelo_logit_3, modelo_logit.2, test="LRT")
 
 # Este enlace es apropiado
 
@@ -669,7 +819,7 @@ modelo_probit.2 <- glm(fraud_bool ~ income + housing_status +
     family = binomial(link = "probit"),
     na.action = na.omit)
 
-# anova(modelo_probit, modelo_probit.2, test="LRT") 
+# anova(modelo_probit, modelo_probit.2, test="LRT")
 
 # Este enlace es apropiado
 
@@ -689,7 +839,7 @@ modelo_cloglog.2 <- glm(fraud_bool ~ income + housing_status +
     family = binomial(link = "cloglog"),
     na.action = na.omit)
 
-# anova(modelo_cloglog, modelo_cloglog.2, test="LRT") 
+# anova(modelo_cloglog, modelo_cloglog.2, test="LRT")
 
 # Este enlace es apropiado
 
@@ -761,11 +911,11 @@ modelo_cloglog.2 <- glm(fraud_bool ~ income + housing_status +
 
 |   Enlace  | Estadistica test RV | Grados de libertad test RV | Valor p test RV | Estadistica test H-L | Grados de libertad test H-L | Valor p  test H-L |
 |:---------:|:-------------------:|:--------------------------:|:---------------:|:--------------------:|:---------------------------:|:-----------------:|
-| Logístico |        0.2831       |              1             |      0.3799     |        3.4613        |              8              |       0.9022      |
-|   Probit  |        0.4987       |              1             |      0.1689     |        5.9454        |              8              |       0.6534      |
-|  Cloglog  |        0.0115       |              1             |      0.9663     |        3.1135        |              8              |       0.9270      |
+| Logístico |        0.8010       |              1             |      0.3708     |        2.7342        |              8              |       0.9499      |
+|   Probit  |        1.9706       |              1             |      0.1604     |        5.7644        |              8              |       0.6736      |
+|  Cloglog  |        0.0015       |              1             |      0.9682     |        2.6860        |              8              |       0.9525      |
 
-:Test de comprabación de la función de enlace y bondad de ajuste
+:Test de comprobación de la función de enlace y bondad del ajuste
 
 Los tres enlaces son apropiados, por lo tanto nos quedamos con el enlace logit por su facilidad en la interpretación.
 
@@ -779,8 +929,8 @@ Los tres enlaces son apropiados, por lo tanto nos quedamos con el enlace logit p
 ### Modelo estimado
 
 $$
-logit(\pi_i) = \hat\beta_0 + \hat\beta_I\cdot I_i + \hat\beta_{H1}\cdot H_{1i} + \hat\beta_{H2}\cdot H_{2i} + \hat\beta_{H3}\cdot H_{3i} + \hat\beta_{H4}\cdot H_{4i} + \hat\beta_{H5}\cdot H_{5i} + \hat\beta_{Ph}\cdot Ph_i +$$
-$$+ \hat\beta_{Pm}\cdot Pm_i + \hat\beta_C\cdot C_i + \hat\beta_L\cdot L_i + \hat\beta_{D1}\cdot D_{1i} + \hat\beta_{D2}\cdot D_{2i} + \hat\beta_{D3}\cdot D_{3i} + \hat\beta_{D4}\cdot D_{4i} + \hat\beta_E\cdot E_i + \hat\beta_{IPm}\cdot I_i\cdot Pm_i + \hat\beta_{CPm}\cdot C_i\cdot Pm_i$$
+logit(\pi_i) = \hat\beta_0 + \hat\beta_I\cdot I_i + \hat\beta_{H1}\cdot H_{1i} + \hat\beta_{H2}\cdot H_{2i} + \hat\beta_{H3}\cdot H_{3i} + \hat\beta_{Ph}\cdot Ph_i +$$
+$$+ \hat\beta_{Pm}\cdot Pm_i + \hat\beta_C\cdot C_i + \hat\beta_L\cdot L_i + \hat\beta_{D1}\cdot D_{1i} + \hat\beta_{D2}\cdot D_{2i} + \hat\beta_{D3}\cdot D_{3i} + \hat\beta_E\cdot E_i$$
 
 ```{r, eval=TRUE}
 
@@ -804,21 +954,20 @@ x <- summary(modelo_logit)
 
 
 
-tabla1 <- data.frame(Beta = c("$\\hat\\beta_0$","$\\hat\\beta_{I}$", "$\\hat\\beta_{H1}$", "$\\hat\\beta_{H2}$", "$\\hat\\beta_{H3}$", "$\\hat\\beta_{H4}$", "$\\hat\\beta_{H5}$", "$\\hat\\beta_{Ph}$"),
+tabla1 <- data.frame(Beta = c("$\\hat\\beta_0$","$\\hat\\beta_{I}$", "$\\hat\\beta_{H1}$", "$\\hat\\beta_{H2}$", "$\\hat\\beta_{H3}$", "$\\hat\\beta_{Ph}$", "$\\hat\\beta_{Pm}$"),
                      Efecto = c("Intercepto", "Ingreso", "Estado residencial:BB",
-                      "Estado residencial:BC", "Estado residencial:BD",
-                      "Estado residencial:BE","Estado residencial:BF",
-                      "Teléfono fijo:Válido"),
-           Coeficiente = modelo_logit$coefficients[1:8],row.names = NULL,
-           LI = modelo_logit$coefficients[1:8] - x$coefficients[1:8,2]*1.96, 
-           LS = modelo_logit$coefficients[1:8] + x$coefficients[1:8,2]*1.96
+                      "Estado residencial:BC", "Estado residencial:Otros",
+                      "Teléfono fijo:Válido", "Teléfono móvil:Válido"),
+           Coeficiente = modelo_logit$coefficients[1:7],row.names = NULL,
+           LI = modelo_logit$coefficients[1:7] - x$coefficients[1:7,2]*1.96, 
+           LS = modelo_logit$coefficients[1:7] + x$coefficients[1:7,2]*1.96
            )
 
-tabla2 <- data.frame(Beta = c("$\\hat\\beta_{Pm}$", "$\\hat\\beta_{C}$", "$\\hat\\beta_{L}$", "$\\hat\\beta_{D1}$", "$\\hat\\beta_{D2}$", "$\\hat\\beta_{D3}$", "$\\hat\\beta_{D4}$", "$\\hat\\beta_{E}$"),
-                     Efecto = c("Teléfono móvil:Válido", "Otra tarjeta:Si", "Límite propuesto", "Sistema operativo:MacOS", "Sistema operativo:Otro", "Sistema operativo:Windows", "Sistema operativo:OSx11", "N° de emails distintos (8 sem)"),
-           Coeficiente = modelo_logit$coefficients[9:16],row.names = NULL,
-           LI = modelo_logit$coefficients[9:16] - x$coefficients[9:16,2]*1.96, 
-           LS = modelo_logit$coefficients[9:16] + x$coefficients[9:16,2]*1.96
+tabla2 <- data.frame(Beta = c("$\\hat\\beta_{C}$", "$\\hat\\beta_{L}$", "$\\hat\\beta_{D1}$", "$\\hat\\beta_{D2}$", "$\\hat\\beta_{D3}$", "$\\hat\\beta_{E}$"),
+                     Efecto = c("Otra tarjeta:Si", "Crédito límite propuesto", "Sistema operativo:MacOS", "Sistema operativo:Otro", "Sistema operativo:Windows", "N° de emails distintos (8 sem)"),
+           Coeficiente = modelo_logit$coefficients[8:13],row.names = NULL,
+           LI = modelo_logit$coefficients[8:13] - x$coefficients[8:13,2]*1.96, 
+           LS = modelo_logit$coefficients[8:13] + x$coefficients[8:13,2]*1.96
            )
 
 ```
@@ -1022,7 +1171,7 @@ A su vez, cuando el cliente proporciona un telefono fijo válido, la chance de q
 
 Cuando el ingreso del cliente aumenta en un decil, la chance de que cometa fraude aumenta entre un 12% y un 50%, cuando las variables son constantes.
 
-Los clientes que tienen otra tarjeta en el mismo banco tienen una chance de cometer fraude entre un 15% y un 86% menor que aquellos que no tienen, cuando el resto de las variables son constantes.
+Los clientes que tienen otra tarjeta en el mismo banco tienen una chance de cometer fraude entre un 14% y un 86% menor que aquellos que no tienen, cuando el resto de las variables son constantes.
 
 Las características de las personas más propensas a cometer fraude son:
 
@@ -1038,7 +1187,7 @@ Las características de las personas más propensas a cometer fraude son:
 
 - Límite del crédito propuesto alto
 
-- Sistema operativo usado  macOS
+- Sistema operativo usado macOS
 
 - 2 emails registrados en la página del banco en las últimas 8 semanas
 
@@ -1047,7 +1196,7 @@ Las características de las personas menos propensas a cometer fraude son:
 
 - Ingreso Bajo
 
-- Estado residencial del aplicante "BE"
+- Estado residencial del aplicante otro (distinto de "BA", "BB", "BC")
 
 - Número de teléfono fijo proporcionado válido
 
@@ -1057,7 +1206,7 @@ Las características de las personas menos propensas a cometer fraude son:
 
 - Límite del crédito propuesto bajo
 
-- Sistema operativo usado otros
+- Sistema operativo usado otros (distintos de Windows, macos y Linux)
 
 - Un solo email registrado en la página del banco en las últimas 8 semanas
 
@@ -1081,7 +1230,7 @@ data.frame(especificidad = curva_roc_knn$specificities,
   geom_line(aes(x = especificidad, y = sensibilidad)) +
   scale_x_reverse() +
   geom_segment(x = -1, xend=0, y = 0, yend = 1) +
-  annotate(x = 0.45, y = 0.75, geom = "text", label = paste("AUC =", round(curva_roc_knn$auc, digits = 4))) +
+  annotate(x = 0.8, y = 0.4, geom = "text", label = paste("AUC =", round(curva_roc_knn$auc, digits = 4))) +
   geom_mark_ellipse(
     aes(x = best_knn$specificity, y = best_knn$sensitivity,
       label = format(round(as.numeric(best_knn$threshold), digits = 6), scientific = F),
@@ -1092,7 +1241,7 @@ data.frame(especificidad = curva_roc_knn$specificities,
 
 ```
 
-Se decidió elegir el mejor punto de corte como aquel que maximiza la especificidad garantizando una sensibilidad de al menos un 90%, esto para evitar el máximo número de fraudes posibles sin afectar a los clientes legítimos.
+Se decidió elegir el mejor punto de corte como aquel que maximiza la especificidad (probabilidad de que un no fraude sea clasificado como tal) garantizando una sensibilidad (probabilidad de que un fraude sea clasificado como tal) de al menos un 90%, esto para evitar el máximo número de fraudes posibles sin afectar a los clientes legítimos.
 
 ```{r capacidad predictiva modelo sin interaccion}
 prob_pred <- exp(predict(modelo_logit, newdata = data_test))/(1+exp(predict(modelo_logit, newdata = data_test)))
@@ -1128,9 +1277,9 @@ data.frame(matriz_confucion$table) |>
         plot.caption = element_text(hjust=0.5,size = 10))
 ```
 
-Además, se quiso evaluar la capacidad predictiva del mismo modelo agregando 2 interacciones:
+Además, se quiso evaluar la capacidad predictiva del mismo modelo agregando las 2 interacciones significativas mencionadas en el ajuste del modelo:
 
-```{r capacidad predictiva modelo con interaccion, eval=FALSE}
+```{r capacidad predictiva modelo con interaccion}
 
 #| fig-cap: "Matriz de confusión del modelo con interacciones ante nuevos clientes"
 
@@ -1166,3 +1315,7 @@ data.frame(matriz_confucion$table) |>
 ```
 
 Observando las matrices de confusión y las métricas de comparación, haciendo énfasis en la sensibilidad, se puede notar que el modelo de efectos principales tiene una mejor capacidad preditiva en base al objetivo propuesto que el modelo que tiene 2 efectos más. Esto puede adjudicarse al sobreajuste que el modelo tiene sobre los datos que se usaron como entrenamiento, ya que si bien un modelo con muchos efectos va a predecir mejor sobre los datos que modela, ante nuevos datos el ajuste no será tan bueno.
+
+
+
+# Checkear la cantidad de dummies en los modelos

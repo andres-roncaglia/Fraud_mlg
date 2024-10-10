@@ -8,7 +8,7 @@
 <link href="Presentacion_files/libs/quarto-html/light-border.css" rel="stylesheet">
 <link href="Presentacion_files/libs/quarto-html/quarto-html.min.css" rel="stylesheet" data-mode="light">
 <link href="Presentacion_files/libs/quarto-html/quarto-syntax-highlighting-dark.css" rel="stylesheet" id="quarto-text-highlighting-styles"><meta charset="utf-8">
-  <meta name="generator" content="quarto-1.4.551">
+  <meta name="generator" content="quarto-1.3.450">
 
   <meta name="author" content="Gamboa Nicolas - Roncaglia Andrés - Santini Franco">
   <title>Predicción de fraude financiero</title>
@@ -156,8 +156,7 @@
   }
 
   .callout.callout-titled .callout-body > .callout-content > :last-child {
-    padding-bottom: 0.5rem;
-    margin-bottom: 0;
+    margin-bottom: 0.5rem;
   }
 
   .callout.callout-titled .callout-icon::before {
@@ -320,6 +319,9 @@
       margin-right: 0; 
     }
   </style>
+  
+  <script src="Presentacion_files/libs/kePrint-0.0.1/kePrint.js"></script>
+  <link href="Presentacion_files/libs/lightable-0.0.1/lightable.css" rel="stylesheet">
 </head>
 <body class="quarto-dark">
   <div class="reveal">
@@ -375,189 +377,182 @@ Gamboa Nicolas - Roncaglia Andrés - Santini Franco
 <section id="análisis-descriptivo" class="slide level2 center">
 <h2>Análisis descriptivo</h2>
 
-<img data-src="Presentacion_files/figure-revealjs/unnamed-chunk-3-1.png" class="quarto-figure quarto-figure-center r-stretch" width="960"></section>
+<img data-src="Presentacion_files/figure-revealjs/unnamed-chunk-3-1.png" width="960" class="r-stretch quarto-figure-center"></section>
 <section id="análisis-descriptivo-1" class="slide level2 center">
 <h2>Análisis descriptivo</h2>
 
-<img data-src="Presentacion_files/figure-revealjs/unnamed-chunk-4-1.png" class="quarto-figure quarto-figure-center r-stretch" width="960"></section>
+<img data-src="Presentacion_files/figure-revealjs/unnamed-chunk-4-1.png" width="960" class="r-stretch quarto-figure-center"></section>
 <section id="análisis-descriptivo-2" class="slide level2 center">
 <h2>Análisis descriptivo</h2>
 
-<img data-src="Presentacion_files/figure-revealjs/unnamed-chunk-5-1.png" class="quarto-figure quarto-figure-center r-stretch" width="960"></section>
+<img data-src="Presentacion_files/figure-revealjs/unnamed-chunk-5-1.png" width="960" class="r-stretch quarto-figure-center"></section>
 <section id="análisis-descriptivo-3" class="slide level2 center">
 <h2>Análisis descriptivo</h2>
 
-<img data-src="Presentacion_files/figure-revealjs/unnamed-chunk-6-1.png" class="quarto-figure quarto-figure-center r-stretch" width="960"></section>
+<img data-src="Presentacion_files/figure-revealjs/unnamed-chunk-6-1.png" width="960" class="r-stretch quarto-figure-center"></section>
 <section id="análisis-descriptivo-4" class="slide level2 center">
 <h2>Análisis descriptivo</h2>
 
-<img data-src="Presentacion_files/figure-revealjs/unnamed-chunk-7-1.png" class="quarto-figure quarto-figure-center r-stretch" width="960"></section>
+<img data-src="Presentacion_files/figure-revealjs/unnamed-chunk-7-1.png" width="960" class="r-stretch quarto-figure-center"></section>
 <section id="modelo-seleccionado" class="slide level2">
 <h2>Modelo seleccionado</h2>
 <p><span class="math display">\[
 logit(\pi_i) = \beta_0 + \overbrace{\beta_I\cdot I_i}^{\text{Ingreso}} + \overbrace{\beta_{H1}\cdot H_{1i} + \beta_{H2}\cdot H_{2i} + \beta_{H3}\cdot H_{3i}}^{\text{Estado residencial}} + \\ +\overbrace{\beta_{Ph}\cdot Ph_i}^{\text{Validez tel. fijo}} + \overbrace{\beta_{Pm}\cdot Pm_i}^{\text{Validez celular}} + \overbrace{\beta_C\cdot C_i}^{\text{Otras tarjetas}} + \overbrace{\beta_L\cdot L_i}^{\text{Lim. crediticio}} + \\ + \overbrace{\beta_{D1}\cdot D_{1i} + \beta_{D2}\cdot D_{2i} + \beta_{D3}\cdot D_{3i}}^{\text{Sistitema operativo del dispositivo}} + \overbrace{\beta_E\cdot E_i}^{\text{Nº e-mails}}
 \]</span></p>
 </section>
-<section id="comprobación-del-enlace" class="slide level2 bigger">
-<h2>Comprobación del enlace</h2>
-<style type="text/css">
-.tg  {border-collapse:collapse;border-spacing:0;}
-.tg td{border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;
-  overflow:hidden;padding:10px 5px;word-break:normal;}
-.tg th{border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;
-  font-weight:normal;overflow:hidden;padding:10px 5px;word-break:normal;}
-.tg .tg-x3s1{border-color:inherit;font-size:xx-large;text-align:center;vertical-align:top}
-</style>
-<table class="tg">
+<section id="comprobación-del-enlace-y-bondad-del-ajuste" class="slide level2 bigger">
+<h2>Comprobación del enlace y bondad del ajuste</h2>
+<div class="cell" data-layout-align="center">
+<div class="cell-output-display">
+<table class="table" data-quarto-postprocess="true" style="margin-left: auto; margin-right: auto;">
 <thead>
-<tr>
-<th class="tg-x3s1">
-Enlace
-</th>
-<th class="tg-x3s1">
-Estadistica<br>test RV
-</th>
-<th class="tg-x3s1">
-Grados de libertad<br>test RV
-</th>
-<th class="tg-x3s1">
-Valor p<br>test RV
-</th>
-<th class="tg-x3s1">
-Estadistica<br>test H-L
-</th>
-<th class="tg-x3s1">
-Grados de libertad<br>test H-L
-</th>
-<th class="tg-x3s1">
-Valor p <br>test H-L
-</th>
+<tr class="header">
+<th data-quarto-table-cell-role="th" style="text-align: left; color: rgba(229, 229, 229, 255) !important; background-color: rgba(242, 84, 91, 255) !important;">Enlace</th>
+<th data-quarto-table-cell-role="th" style="text-align: right; color: rgba(229, 229, 229, 255) !important; background-color: rgba(242, 84, 91, 255) !important;">Est. RV</th>
+<th data-quarto-table-cell-role="th" style="text-align: right; color: rgba(229, 229, 229, 255) !important; background-color: rgba(242, 84, 91, 255) !important;">GL RV</th>
+<th data-quarto-table-cell-role="th" style="text-align: right; color: rgba(229, 229, 229, 255) !important; background-color: rgba(242, 84, 91, 255) !important;">Valor-p RV</th>
+<th data-quarto-table-cell-role="th" style="text-align: right; color: rgba(229, 229, 229, 255) !important; background-color: rgba(242, 84, 91, 255) !important;">Est. HL</th>
+<th data-quarto-table-cell-role="th" style="text-align: right; color: rgba(229, 229, 229, 255) !important; background-color: rgba(242, 84, 91, 255) !important;">GL HL</th>
+<th data-quarto-table-cell-role="th" style="text-align: right; color: rgba(229, 229, 229, 255) !important; background-color: rgba(242, 84, 91, 255) !important;">Valor-p HL</th>
 </tr>
 </thead>
 <tbody>
-<tr>
-<td class="tg-x3s1">
-Logístico
-</td>
-<td class="tg-x3s1">
-0.8010
-</td>
-<td class="tg-x3s1">
-1
-</td>
-<td class="tg-x3s1">
-0.3708
-</td>
-<td class="tg-x3s1">
-2.7342
-</td>
-<td class="tg-x3s1">
-8
-</td>
-<td class="tg-x3s1">
-0.9499
-</td>
+<tr class="odd">
+<td style="text-align: left; color: rgba(229, 229, 229, 255) !important; background-color: rgba(25, 25, 25, 255) !important; background-color: rgba(25, 25, 25, 255) !important;">Logístico</td>
+<td style="text-align: right; color: rgba(229, 229, 229, 255) !important; background-color: rgba(25, 25, 25, 255) !important;">0.8010</td>
+<td style="text-align: right; color: rgba(229, 229, 229, 255) !important; background-color: rgba(25, 25, 25, 255) !important;">1</td>
+<td style="text-align: right; color: rgba(229, 229, 229, 255) !important; background-color: rgba(25, 25, 25, 255) !important;">0.3708</td>
+<td style="text-align: right; color: rgba(229, 229, 229, 255) !important; background-color: rgba(25, 25, 25, 255) !important;">2.7342</td>
+<td style="text-align: right; color: rgba(229, 229, 229, 255) !important; background-color: rgba(25, 25, 25, 255) !important;">8</td>
+<td style="text-align: right; color: rgba(229, 229, 229, 255) !important; background-color: rgba(25, 25, 25, 255) !important;">0.9499</td>
 </tr>
-<tr>
-<td class="tg-x3s1">
-Probit
-</td>
-<td class="tg-x3s1">
-1.9706
-</td>
-<td class="tg-x3s1">
-1
-</td>
-<td class="tg-x3s1">
-0.1604
-</td>
-<td class="tg-x3s1">
-5.7644
-</td>
-<td class="tg-x3s1">
-8
-</td>
-<td class="tg-x3s1">
-0.6736
-</td>
+<tr class="even">
+<td style="text-align: left; color: rgba(229, 229, 229, 255) !important; background-color: rgba(25, 25, 25, 255) !important; background-color: rgba(25, 25, 25, 255) !important;">Probit</td>
+<td style="text-align: right; color: rgba(229, 229, 229, 255) !important; background-color: rgba(25, 25, 25, 255) !important;">1.9706</td>
+<td style="text-align: right; color: rgba(229, 229, 229, 255) !important; background-color: rgba(25, 25, 25, 255) !important;">1</td>
+<td style="text-align: right; color: rgba(229, 229, 229, 255) !important; background-color: rgba(25, 25, 25, 255) !important;">0.1604</td>
+<td style="text-align: right; color: rgba(229, 229, 229, 255) !important; background-color: rgba(25, 25, 25, 255) !important;">5.7644</td>
+<td style="text-align: right; color: rgba(229, 229, 229, 255) !important; background-color: rgba(25, 25, 25, 255) !important;">8</td>
+<td style="text-align: right; color: rgba(229, 229, 229, 255) !important; background-color: rgba(25, 25, 25, 255) !important;">0.6736</td>
 </tr>
-<tr>
-<td class="tg-x3s1">
-Cloglog
-</td>
-<td class="tg-x3s1">
-0.0015
-</td>
-<td class="tg-x3s1">
-1
-</td>
-<td class="tg-x3s1">
-0.9682
-</td>
-<td class="tg-x3s1">
-2.6860
-</td>
-<td class="tg-x3s1">
-8
-</td>
-<td class="tg-x3s1">
-0.9525
-</td>
+<tr class="odd">
+<td style="text-align: left; color: rgba(229, 229, 229, 255) !important; background-color: rgba(25, 25, 25, 255) !important; background-color: rgba(25, 25, 25, 255) !important;">Cloglog</td>
+<td style="text-align: right; color: rgba(229, 229, 229, 255) !important; background-color: rgba(25, 25, 25, 255) !important;">0.0015</td>
+<td style="text-align: right; color: rgba(229, 229, 229, 255) !important; background-color: rgba(25, 25, 25, 255) !important;">1</td>
+<td style="text-align: right; color: rgba(229, 229, 229, 255) !important; background-color: rgba(25, 25, 25, 255) !important;">0.9682</td>
+<td style="text-align: right; color: rgba(229, 229, 229, 255) !important; background-color: rgba(25, 25, 25, 255) !important;">2.6860</td>
+<td style="text-align: right; color: rgba(229, 229, 229, 255) !important; background-color: rgba(25, 25, 25, 255) !important;">8</td>
+<td style="text-align: right; color: rgba(229, 229, 229, 255) !important; background-color: rgba(25, 25, 25, 255) !important;">0.9525</td>
 </tr>
 </tbody>
 </table>
+
+
+</div>
+</div>
+<!-- <style type="text/css"> -->
+<!-- .tg  {border-collapse:collapse;border-spacing:0;} -->
+<!-- .tg td{border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px; -->
+<!--   overflow:hidden;padding:10px 5px;word-break:normal;} -->
+<!-- .tg th{border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px; -->
+<!--   font-weight:normal;overflow:hidden;padding:10px 5px;word-break:normal;} -->
+<!-- .tg .tg-x3s1{border-color:inherit;font-size:xx-large;text-align:center;vertical-align:top} -->
+<!-- </style> -->
+
+<!-- <table class="tg"><thead> -->
+<!--   <tr> -->
+<!--     <th class="tg-x3s1">Enlace</th> -->
+<!--     <th class="tg-x3s1">Estadistica<br>test RV</th> -->
+<!--     <th class="tg-x3s1">Grados de libertad<br>test RV</th> -->
+<!--     <th class="tg-x3s1">Valor p<br>test RV</th> -->
+<!--     <th class="tg-x3s1">Estadistica<br>test H-L</th> -->
+<!--     <th class="tg-x3s1">Grados de libertad<br>test H-L</th> -->
+<!--     <th class="tg-x3s1">Valor p <br>test H-L</th> -->
+<!--   </tr></thead> -->
+<!-- <tbody> -->
+<!--   <tr> -->
+<!--     <td class="tg-x3s1">Logístico</td> -->
+<!--     <td class="tg-x3s1">0.8010</td> -->
+<!--     <td class="tg-x3s1">1</td> -->
+<!--     <td class="tg-x3s1">0.3708</td> -->
+<!--     <td class="tg-x3s1">2.7342</td> -->
+<!--     <td class="tg-x3s1">8</td> -->
+<!--     <td class="tg-x3s1">0.9499</td> -->
+<!--   </tr> -->
+<!--   <tr> -->
+<!--     <td class="tg-x3s1">Probit</td> -->
+<!--     <td class="tg-x3s1">1.9706</td> -->
+<!--     <td class="tg-x3s1">1</td> -->
+<!--     <td class="tg-x3s1">0.1604</td> -->
+<!--     <td class="tg-x3s1">5.7644</td> -->
+<!--     <td class="tg-x3s1">8</td> -->
+<!--     <td class="tg-x3s1">0.6736</td> -->
+<!--   </tr> -->
+<!--   <tr> -->
+<!--     <td class="tg-x3s1">Cloglog</td> -->
+<!--     <td class="tg-x3s1">0.0015</td> -->
+<!--     <td class="tg-x3s1">1</td> -->
+<!--     <td class="tg-x3s1">0.9682</td> -->
+<!--     <td class="tg-x3s1">2.6860</td> -->
+<!--     <td class="tg-x3s1">8</td> -->
+<!--     <td class="tg-x3s1">0.9525</td> -->
+<!--   </tr> -->
+
+<!-- </tbody></table> -->
 </section>
 <section id="análisis-de-residuos" class="slide level2 center">
 <h2>Análisis de residuos</h2>
 <h3 class="center" id="evaluación-de-la-componente-sistemática">Evaluación de la componente sistemática</h3>
 
-<img data-src="Presentacion_files/figure-revealjs/unnamed-chunk-9-1.png" class="quarto-figure quarto-figure-center r-stretch" width="960"></section>
+<img data-src="Presentacion_files/figure-revealjs/unnamed-chunk-9-1.png" width="960" class="r-stretch quarto-figure-center"></section>
 <section id="análisis-de-residuos-1" class="slide level2 center">
 <h2>Análisis de residuos</h2>
 <h3 class="center" id="comprobación-de-la-distribución-propuesta">Comprobación de la distribución propuesta</h3>
 
-<img data-src="Presentacion_files/figure-revealjs/unnamed-chunk-10-1.png" class="quarto-figure quarto-figure-center r-stretch" width="960"></section>
+<img data-src="Presentacion_files/figure-revealjs/unnamed-chunk-10-1.png" width="960" class="r-stretch quarto-figure-center"></section>
 <section id="interpretaciones" class="slide level2">
 <h2>Interpretaciones</h2>
 <div class="cell" data-layout-align="center">
 <div class="cell-output-display">
-<table>
-<caption>Razones de odds del modelo ajustado</caption>
+<table class="table" data-quarto-postprocess="true" style="margin-left: auto; margin-right: auto;">
+<caption>Razones de odds del modelo ajustado </caption>
 <thead>
 <tr class="header">
-<th style="text-align: left;">RO</th>
-<th style="text-align: right;">Estimación</th>
-<th style="text-align: right;">LI</th>
-<th style="text-align: right;">LS</th>
+<th data-quarto-table-cell-role="th" style="text-align: left; color: rgba(229, 229, 229, 255) !important; background-color: rgba(242, 84, 91, 255) !important;">RO</th>
+<th data-quarto-table-cell-role="th" style="text-align: right; color: rgba(229, 229, 229, 255) !important; background-color: rgba(242, 84, 91, 255) !important;">Estimación</th>
+<th data-quarto-table-cell-role="th" style="text-align: right; color: rgba(229, 229, 229, 255) !important; background-color: rgba(242, 84, 91, 255) !important;">LI</th>
+<th data-quarto-table-cell-role="th" style="text-align: right; color: rgba(229, 229, 229, 255) !important; background-color: rgba(242, 84, 91, 255) !important;">LS</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td style="text-align: left;">Límite propuesto</td>
-<td style="text-align: right;">1.1161</td>
-<td style="text-align: right;">1.0518</td>
-<td style="text-align: right;">1.1843</td>
+<td style="text-align: left; color: rgba(229, 229, 229, 255) !important; background-color: rgba(25, 25, 25, 255) !important; background-color: rgba(25, 25, 25, 255) !important;">Límite propuesto (100 unidades)</td>
+<td style="text-align: right; color: rgba(229, 229, 229, 255) !important; background-color: rgba(25, 25, 25, 255) !important;">1.1161</td>
+<td style="text-align: right; color: rgba(229, 229, 229, 255) !important; background-color: rgba(25, 25, 25, 255) !important;">1.0518</td>
+<td style="text-align: right; color: rgba(229, 229, 229, 255) !important; background-color: rgba(25, 25, 25, 255) !important;">1.1843</td>
 </tr>
 <tr class="even">
-<td style="text-align: left;">Teléfono fijo:Válido</td>
-<td style="text-align: right;">0.2650</td>
-<td style="text-align: right;">0.1197</td>
-<td style="text-align: right;">0.5868</td>
+<td style="text-align: left; color: rgba(229, 229, 229, 255) !important; background-color: rgba(25, 25, 25, 255) !important; background-color: rgba(25, 25, 25, 255) !important;">Teléfono fijo (Válido vs No válido)</td>
+<td style="text-align: right; color: rgba(229, 229, 229, 255) !important; background-color: rgba(25, 25, 25, 255) !important;">0.2650</td>
+<td style="text-align: right; color: rgba(229, 229, 229, 255) !important; background-color: rgba(25, 25, 25, 255) !important;">0.1197</td>
+<td style="text-align: right; color: rgba(229, 229, 229, 255) !important; background-color: rgba(25, 25, 25, 255) !important;">0.5868</td>
 </tr>
 <tr class="odd">
-<td style="text-align: left;">Ingreso</td>
-<td style="text-align: right;">1.2928</td>
-<td style="text-align: right;">1.1164</td>
-<td style="text-align: right;">1.4971</td>
+<td style="text-align: left; color: rgba(229, 229, 229, 255) !important; background-color: rgba(25, 25, 25, 255) !important; background-color: rgba(25, 25, 25, 255) !important;">Ingreso (0.1 unidades)</td>
+<td style="text-align: right; color: rgba(229, 229, 229, 255) !important; background-color: rgba(25, 25, 25, 255) !important;">1.2928</td>
+<td style="text-align: right; color: rgba(229, 229, 229, 255) !important; background-color: rgba(25, 25, 25, 255) !important;">1.1164</td>
+<td style="text-align: right; color: rgba(229, 229, 229, 255) !important; background-color: rgba(25, 25, 25, 255) !important;">1.4971</td>
 </tr>
 <tr class="even">
-<td style="text-align: left;">Tenencia otra tarjeta</td>
-<td style="text-align: right;">0.3425</td>
-<td style="text-align: right;">0.1366</td>
-<td style="text-align: right;">0.8589</td>
+<td style="text-align: left; color: rgba(229, 229, 229, 255) !important; background-color: rgba(25, 25, 25, 255) !important; background-color: rgba(25, 25, 25, 255) !important;">Tenencia otra tarjeta (Si vs No)</td>
+<td style="text-align: right; color: rgba(229, 229, 229, 255) !important; background-color: rgba(25, 25, 25, 255) !important;">0.3425</td>
+<td style="text-align: right; color: rgba(229, 229, 229, 255) !important; background-color: rgba(25, 25, 25, 255) !important;">0.1366</td>
+<td style="text-align: right; color: rgba(229, 229, 229, 255) !important; background-color: rgba(25, 25, 25, 255) !important;">0.8589</td>
 </tr>
 </tbody>
 </table>
+
+
 </div>
 </div>
 </section>
@@ -571,24 +566,22 @@ Cloglog
 <section id="curva-roc" class="slide level2">
 <h2>Curva ROC</h2>
 
-<img data-src="Presentacion_files/figure-revealjs/unnamed-chunk-11-1.png" class="quarto-figure quarto-figure-center r-stretch" width="960"></section>
+<img data-src="Presentacion_files/figure-revealjs/unnamed-chunk-11-1.png" width="960" class="r-stretch quarto-figure-center"></section>
 <section id="section-3" class="slide level2">
 <h2></h2>
 <h4 id="matriz-de-confusión-del-modelo-ajustado-ante-nuevos-clientes">Matriz de confusión del modelo ajustado ante nuevos clientes</h4>
 
-<img data-src="Presentacion_files/figure-revealjs/capacidad%20predictiva%20modelo%20sin%20interaccion%202-1.png" class="quarto-figure quarto-figure-center r-stretch" width="960"></section>
+<img data-src="Presentacion_files/figure-revealjs/capacidad%20predictiva%20modelo%20sin%20interaccion%202-1.png" width="960" class="r-stretch quarto-figure-center"></section>
 <section id="section-4" class="slide level2">
 <h2></h2>
 <h4 id="matriz-de-confusión-del-modelo-con-interacciones-ante-nuevos-clientes">Matriz de confusión del modelo con interacciones ante nuevos clientes</h4>
 
-<img data-src="Presentacion_files/figure-revealjs/capacidad%20predictiva%20modelo%20con%20interaccion%202-1.png" class="quarto-figure quarto-figure-center r-stretch" width="960"></section>
+<img data-src="Presentacion_files/figure-revealjs/capacidad%20predictiva%20modelo%20con%20interaccion%202-1.png" width="960" class="r-stretch quarto-figure-center"></section>
 <section id="gracias-por-su-atención" class="slide level2 center">
 <h2>¡¡¡Gracias por su atención!!! 😃😃😃</h2>
-<div class="quarto-auto-generated-content">
-<p><img src="Imgs/logounr.png" class="slide-logo"></p>
-<div class="footer footer-default">
 
-</div>
+<img src="Imgs/logounr.png" class="slide-logo r-stretch"><div class="footer footer-default">
+
 </div>
 </section>
     </div>
@@ -617,6 +610,7 @@ Cloglog
       Reveal.initialize({
 'controlsAuto': true,
 'previewLinksAuto': false,
+'smaller': false,
 'pdfSeparateFragments': false,
 'autoAnimateEasing': "ease",
 'autoAnimateDuration': 1,
@@ -802,80 +796,42 @@ Cloglog
       });
     </script>
     
-
     <script>
-
       // htmlwidgets need to know to resize themselves when slides are shown/hidden.
-
       // Fire the "slideenter" event (handled by htmlwidgets.js) when the current
-
       // slide changes (different for each slide format).
-
       (function () {
-
         // dispatch for htmlwidgets
-
         function fireSlideEnter() {
-
           const event = window.document.createEvent("Event");
-
           event.initEvent("slideenter", true, true);
-
           window.document.dispatchEvent(event);
-
         }
-
-    
 
         function fireSlideChanged(previousSlide, currentSlide) {
-
           fireSlideEnter();
 
-    
-
           // dispatch for shiny
-
           if (window.jQuery) {
-
             if (previousSlide) {
-
               window.jQuery(previousSlide).trigger("hidden");
-
             }
-
             if (currentSlide) {
-
               window.jQuery(currentSlide).trigger("shown");
-
             }
-
           }
-
         }
-
-    
 
         // hookup for slidy
-
         if (window.w3c_slidy) {
-
           window.w3c_slidy.add_observer(function (slide_num) {
-
             // slide_num starts at position 1
-
             fireSlideChanged(null, w3c_slidy.slides[slide_num - 1]);
-
           });
-
         }
 
-    
-
       })();
-
     </script>
-
-    
 
     <script id="quarto-html-after-body" type="application/javascript">
     window.document.addEventListener("DOMContentLoaded", function (event) {
@@ -953,27 +909,10 @@ Cloglog
         // clear code selection
         e.clearSelection();
       });
-        var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
-        var mailtoRegex = new RegExp(/^mailto:/);
-          var filterRegex = new RegExp('/' + window.location.host + '/');
-        var isInternal = (href) => {
-            return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
-        }
-        // Inspect non-navigation links and adorn them if external
-     	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool)');
-        for (var i=0; i<links.length; i++) {
-          const link = links[i];
-          if (!isInternal(link.href)) {
-            // undo the damage that might have been done by quarto-nav.js in the case of
-            // links that we want to consider external
-            if (link.dataset.originalHref !== undefined) {
-              link.href = link.dataset.originalHref;
-            }
-          }
-        }
-      function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      function tippyHover(el, contentFn) {
         const config = {
           allowHTML: true,
+          content: contentFn,
           maxWidth: 500,
           delay: 100,
           arrow: false,
@@ -983,17 +922,8 @@ Cloglog
           interactive: true,
           interactiveBorder: 10,
           theme: 'light-border',
-          placement: 'bottom-start',
+          placement: 'bottom-start'
         };
-        if (contentFn) {
-          config.content = contentFn;
-        }
-        if (onTriggerFn) {
-          config.onTrigger = onTriggerFn;
-        }
-        if (onUntriggerFn) {
-          config.onUntrigger = onUntriggerFn;
-        }
           config['offset'] = [0,0];
           config['maxWidth'] = 700;
         window.tippy(el, config); 
@@ -1007,11 +937,7 @@ Cloglog
           try { href = new URL(href).hash; } catch {}
           const id = href.replace(/^#\/?/, "");
           const note = window.document.getElementById(id);
-          if (note) {
-            return note.innerHTML;
-          } else {
-            return "";
-          }
+          return note.innerHTML;
         });
       }
       const findCites = (el) => {

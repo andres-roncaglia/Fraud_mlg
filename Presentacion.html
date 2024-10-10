@@ -8,7 +8,7 @@
 <link href="Presentacion_files/libs/quarto-html/light-border.css" rel="stylesheet">
 <link href="Presentacion_files/libs/quarto-html/quarto-html.min.css" rel="stylesheet" data-mode="light">
 <link href="Presentacion_files/libs/quarto-html/quarto-syntax-highlighting-dark.css" rel="stylesheet" id="quarto-text-highlighting-styles"><meta charset="utf-8">
-  <meta name="generator" content="quarto-1.4.554">
+  <meta name="generator" content="quarto-1.4.551">
 
   <meta name="author" content="Gamboa Nicolas - Roncaglia Andrés - Santini Franco">
   <title>Predicción de fraude financiero</title>
@@ -340,12 +340,11 @@ Gamboa Nicolas - Roncaglia Andrés - Santini Franco
 </section>
 <section id="section" class="slide level2 center">
 <h2></h2>
-<!-- El fraude con tarjetas de crédito es una de las principales amenazas que sufren los bancos. Con el auge de la tecnología las transacciones digitales facilitaron los traspasos de dinero y los medios de pago electrónicos son algo de cada día, pero junto con las ventajas también vinieron las consecuencias, y es que los métodos de fraude se han vuelto más sofisticados, generando pérdidas significativas a los bancos y afectando la confianza de los usuarios. Actividades como el uso no autorizado de tarjetas, la clonación de datos y transacciones fraudulentas requieren el desarrollo de tecnologías avanzadas para la detección temprana y la prevención. -->
 <p>El fraude con tarjetas de crédito es una de las principales amenazas que sufren los bancos. Con el auge las transacciones digitales y los medios de pago electrónicos, se facilitaron los traspasos de dinero, pero junto con las ventajas también vinieron las consecuencias, y es que los métodos de fraude se han vuelto más sofisticados, generando pérdidas significativas a los bancos y afectando la confianza de los usuarios. Actividades como el uso no autorizado de tarjetas, la clonación de datos y transacciones fraudulentas requieren el desarrollo de tecnologías avanzadas para la detección temprana y la prevención.</p>
 </section>
-<section id="section-1" class="slide level2">
+<section id="section-1" class="slide level2 smaller">
 <h2></h2>
-<h4 id="variables-más-relevantes">Variables más relevantes</h4>
+<h3 id="variables-más-relevantes">Variables más relevantes</h3>
 <ul>
 <li><p><code>fraud_bool</code>: Indicadora de si la transacción fue fraude o no</p></li>
 <li><p><code>income</code>: Ingreso anual en cuantiles</p></li>
@@ -353,22 +352,18 @@ Gamboa Nicolas - Roncaglia Andrés - Santini Franco
 <li><p><code>customer_age</code>: Edad del cliente en décadas</p></li>
 <li><p><code>days_since_request</code>: Días desde la solicitud</p></li>
 <li><p><code>payment_type</code>: Tipo del plan de pago</p></li>
-</ul>
-</section>
-<section id="section-2" class="slide level2">
-<h2></h2>
-<ul>
 <li><p><code>employment_status</code>: Estado de empleo del solicitante</p></li>
 <li><p><code>credit_risk_score</code>: Score de riesgo de la aplicación</p></li>
 <li><p><code>email_is_free</code>: Tipo del dominio del email del aplicante (email pago o gratis)</p></li>
+</ul>
+</section>
+<section id="section-2" class="slide level2 smaller">
+<h2></h2>
+<h3 id="variables-más-relevantes-1">Variables más relevantes</h3>
+<ul>
 <li><p><code>housing_status</code>: Estado residencial del aplicante</p></li>
 <li><p><code>phone_home_valid</code>: Validez del telefono fijo provisto</p></li>
 <li><p><code>phone_mobile_valid</code>: Validez del telefono movil provisto</p></li>
-</ul>
-</section>
-<section id="section-3" class="slide level2">
-<h2></h2>
-<ul>
 <li><p><code>has_other_cards</code>: Indicadora de si la persona tiene otra tarjeta en el mismo banco</p></li>
 <li><p><code>proposed_credit_limit</code>: Crédito limite propuesto por el aplicante</p></li>
 <li><p><code>foreign_request</code>: Indicadora de si la solicitud fue hecha en el pais del banco</p></li>
@@ -400,10 +395,10 @@ Gamboa Nicolas - Roncaglia Andrés - Santini Franco
 <section id="modelo-seleccionado" class="slide level2">
 <h2>Modelo seleccionado</h2>
 <p><span class="math display">\[
-logit(\pi_i) = \beta_0 + \overbrace{\beta_I\cdot I_i}^{\text{Ingreso}} + \\ + \overbrace{\beta_{H1}\cdot H_{1i} + \beta_{H2}\cdot H_{2i} + \beta_{H3}\cdot H_{3i} + \beta_{H4}\cdot H_{4i} + \beta_{H5}\cdot H_{5i}}^{\text{Estado residencial}} + \\ +\overbrace{\beta_{Ph}\cdot Ph_i}^{\text{Validez tel. fijo}} + \overbrace{\beta_{Pm}\cdot Pm_i}^{\text{Validez celular}} + \overbrace{\beta_C\cdot C_i}^{\text{Otras tarjetas}} + \overbrace{\beta_L\cdot L_i}^{\text{Lim. crediticio}} + \\ + \overbrace{\beta_{D1}\cdot D_{1i} + \beta_{D2}\cdot D_{2i} + \beta_{D3}\cdot D_{3i} + \beta_{D4}\cdot D_{4i}}^{\text{Sistitema operativo del dispositivo}} + \\ +\overbrace{\beta_E\cdot E_i}^{\text{Emails}} + \beta_{IPm}\cdot I_i\cdot Pm_i + \beta_{CPm}\cdot C_i\cdot Pm_i
+logit(\pi_i) = \beta_0 + \overbrace{\beta_I\cdot I_i}^{\text{Ingreso}} + \overbrace{\beta_{H1}\cdot H_{1i} + \beta_{H2}\cdot H_{2i} + \beta_{H3}\cdot H_{3i}}^{\text{Estado residencial}} + \\ +\overbrace{\beta_{Ph}\cdot Ph_i}^{\text{Validez tel. fijo}} + \overbrace{\beta_{Pm}\cdot Pm_i}^{\text{Validez celular}} + \overbrace{\beta_C\cdot C_i}^{\text{Otras tarjetas}} + \overbrace{\beta_L\cdot L_i}^{\text{Lim. crediticio}} + \\ + \overbrace{\beta_{D1}\cdot D_{1i} + \beta_{D2}\cdot D_{2i} + \beta_{D3}\cdot D_{3i}}^{\text{Sistitema operativo del dispositivo}} + \overbrace{\beta_E\cdot E_i}^{\text{Nº e-mails}}
 \]</span></p>
 </section>
-<section id="comprobación-del-enlace" class="slide level2 center bigger">
+<section id="comprobación-del-enlace" class="slide level2 bigger">
 <h2>Comprobación del enlace</h2>
 <style type="text/css">
 .tg  {border-collapse:collapse;border-spacing:0;}
@@ -411,78 +406,110 @@ logit(\pi_i) = \beta_0 + \overbrace{\beta_I\cdot I_i}^{\text{Ingreso}} + \\ + \o
   overflow:hidden;padding:10px 5px;word-break:normal;}
 .tg th{border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;
   font-weight:normal;overflow:hidden;padding:10px 5px;word-break:normal;}
-.tg .tg-49rs{border-color:inherit;font-size:large;text-align:center;vertical-align:top}
+.tg .tg-x3s1{border-color:inherit;font-size:xx-large;text-align:center;vertical-align:top}
 </style>
 <table class="tg">
 <thead>
 <tr>
-<th class="tg-49rs">
+<th class="tg-x3s1">
 Enlace
 </th>
-<th class="tg-49rs">
-Estadistica
+<th class="tg-x3s1">
+Estadistica<br>test RV
 </th>
-<th class="tg-49rs">
-Grados de libertad
+<th class="tg-x3s1">
+Grados de libertad<br>test RV
 </th>
-<th class="tg-49rs">
-Valor p
+<th class="tg-x3s1">
+Valor p<br>test RV
+</th>
+<th class="tg-x3s1">
+Estadistica<br>test H-L
+</th>
+<th class="tg-x3s1">
+Grados de libertad<br>test H-L
+</th>
+<th class="tg-x3s1">
+Valor p <br>test H-L
 </th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td class="tg-49rs">
+<td class="tg-x3s1">
 Logístico
 </td>
-<td class="tg-49rs">
-0.28314
+<td class="tg-x3s1">
+0.8010
 </td>
-<td class="tg-49rs">
+<td class="tg-x3s1">
 1
 </td>
-<td class="tg-49rs">
-0.5947
+<td class="tg-x3s1">
+0.3708
+</td>
+<td class="tg-x3s1">
+2.7342
+</td>
+<td class="tg-x3s1">
+8
+</td>
+<td class="tg-x3s1">
+0.9499
 </td>
 </tr>
 <tr>
-<td class="tg-49rs">
+<td class="tg-x3s1">
 Probit
 </td>
-<td class="tg-49rs">
-0.49868
+<td class="tg-x3s1">
+1.9706
 </td>
-<td class="tg-49rs">
+<td class="tg-x3s1">
 1
 </td>
-<td class="tg-49rs">
-0.4801
+<td class="tg-x3s1">
+0.1604
+</td>
+<td class="tg-x3s1">
+5.7644
+</td>
+<td class="tg-x3s1">
+8
+</td>
+<td class="tg-x3s1">
+0.6736
 </td>
 </tr>
 <tr>
-<td class="tg-49rs">
+<td class="tg-x3s1">
 Cloglog
 </td>
-<td class="tg-49rs">
-0.01148
+<td class="tg-x3s1">
+0.0015
 </td>
-<td class="tg-49rs">
+<td class="tg-x3s1">
 1
 </td>
-<td class="tg-49rs">
-0.9147
+<td class="tg-x3s1">
+0.9682
+</td>
+<td class="tg-x3s1">
+2.6860
+</td>
+<td class="tg-x3s1">
+8
+</td>
+<td class="tg-x3s1">
+0.9525
 </td>
 </tr>
 </tbody>
 </table>
-<p>Valor p del test de bondad del ajuste de Hosmer-Lemeshow para el modelo Logístico:</p>
-<div class="fragment">
-<p><span class="math display">\[0.80938\]</span></p>
-</div>
 </section>
 <section id="análisis-de-residuos" class="slide level2 center">
 <h2>Análisis de residuos</h2>
-<h3 class="center" id="evaluación-de-la-componente-sistemática-arreglar">Evaluación de la componente sistemática ARREGLAR</h3>
+<h3 class="center" id="evaluación-de-la-componente-sistemática">Evaluación de la componente sistemática</h3>
 
 <img data-src="Presentacion_files/figure-revealjs/unnamed-chunk-9-1.png" class="quarto-figure quarto-figure-center r-stretch" width="960"></section>
 <section id="análisis-de-residuos-1" class="slide level2 center">
@@ -492,6 +519,50 @@ Cloglog
 <img data-src="Presentacion_files/figure-revealjs/unnamed-chunk-10-1.png" class="quarto-figure quarto-figure-center r-stretch" width="960"></section>
 <section id="interpretaciones" class="slide level2">
 <h2>Interpretaciones</h2>
+<div class="cell" data-layout-align="center">
+<div class="cell-output-display">
+<table>
+<caption>Razones de odds del modelo ajustado</caption>
+<thead>
+<tr class="header">
+<th style="text-align: left;">RO</th>
+<th style="text-align: right;">Estimación</th>
+<th style="text-align: right;">LI</th>
+<th style="text-align: right;">LS</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Límite propuesto</td>
+<td style="text-align: right;">1.1161</td>
+<td style="text-align: right;">1.0518</td>
+<td style="text-align: right;">1.1843</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Teléfono fijo:Válido</td>
+<td style="text-align: right;">0.2650</td>
+<td style="text-align: right;">0.1197</td>
+<td style="text-align: right;">0.5868</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Ingreso</td>
+<td style="text-align: right;">1.2928</td>
+<td style="text-align: right;">1.1164</td>
+<td style="text-align: right;">1.4971</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Tenencia otra tarjeta</td>
+<td style="text-align: right;">0.3425</td>
+<td style="text-align: right;">0.1366</td>
+<td style="text-align: right;">0.8589</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</section>
+<section id="perfiles-destacados" class="slide level2">
+<h2>Perfiles destacados</h2>
 </section>
 <section id="evaluación-de-la-capacidad-predictiva" class="slide level2 center">
 <h2>Evaluación de la capacidad predictiva</h2>
@@ -500,39 +571,18 @@ Cloglog
 <h2>Curva ROC</h2>
 
 <img data-src="Presentacion_files/figure-revealjs/unnamed-chunk-11-1.png" class="quarto-figure quarto-figure-center r-stretch" width="960"></section>
+<section id="section-3" class="slide level2">
+<h2></h2>
+<h4 id="matriz-de-confusión-del-modelo-ajustado-ante-nuevos-clientes">Matriz de confusión del modelo ajustado ante nuevos clientes</h4>
+
+<img data-src="Presentacion_files/figure-revealjs/capacidad%20predictiva%20modelo%20sin%20interaccion%202-1.png" class="quarto-figure quarto-figure-center r-stretch" width="960"></section>
 <section id="section-4" class="slide level2">
 <h2></h2>
-<div class="cell" data-layout-align="center">
-<div class="cell-output cell-output-stdout">
-<pre><code>Confusion Matrix and Statistics
+<h4 id="matriz-de-confusión-del-modelo-con-interacciones-ante-nuevos-clientes">Matriz de confusión del modelo con interacciones ante nuevos clientes</h4>
 
-          Reference
-Prediction   0   1
-         0 132  22
-         1  66  84
-                                         
-               Accuracy : 0.7105         
-                 95% CI : (0.656, 0.7609)
-    No Information Rate : 0.6513         
-    P-Value [Acc &gt; NIR] : 0.01659        
-                                         
-                  Kappa : 0.4187         
-                                         
- Mcnemar's Test P-Value : 4.566e-06      
-                                         
-            Sensitivity : 0.7925         
-            Specificity : 0.6667         
-         Pos Pred Value : 0.5600         
-         Neg Pred Value : 0.8571         
-             Prevalence : 0.3487         
-         Detection Rate : 0.2763         
-   Detection Prevalence : 0.4934         
-      Balanced Accuracy : 0.7296         
-                                         
-       'Positive' Class : 1              
-                                         </code></pre>
-</div>
-</div>
+<img data-src="Presentacion_files/figure-revealjs/capacidad%20predictiva%20modelo%20con%20interaccion%202-1.png" class="quarto-figure quarto-figure-center r-stretch" width="960"></section>
+<section id="gracias-por-su-atención" class="slide level2 center">
+<h2>¡¡¡Gracias por su atención!!! 😃😃😃</h2>
 <div class="quarto-auto-generated-content">
 <p><img src="Imgs/logounr.png" class="slide-logo"></p>
 <div class="footer footer-default">

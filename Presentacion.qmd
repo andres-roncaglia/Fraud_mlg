@@ -23,11 +23,12 @@ library(statmod)
 library(pROC)
 library(ggforce)
 library(caret)
+library(ggdark)
 
-theme_set(theme_bw() + 
+theme_set(ggdark::dark_theme_dark() + 
             theme(plot.title = element_text(hjust = 0.5),
                   legend.position = "bottom",
-                  plot.background = element_rect(fill = "#191919", colour = NA),
+                  plot.background = element_rect(fill = "#191919"),
                   panel.background = element_rect(fill = "#191919"),
                   panel.grid.major = element_line(color = "black"),
                   panel.grid.minor = element_line(color = "black"),
@@ -110,7 +111,15 @@ fraude <- fraude[sel_fraude,]
 no_fraude <- no_fraude[sel_nofraude,]
 
 data <- rbind(fraude, no_fraude)
-
+data <- data |> 
+  mutate(income_ord = as.numeric(income),
+         proposed_credit_limit_cat_ord = as.numeric(proposed_credit_limit_cat),
+         income = income_ord/10,
+         proposed_credit_limit = case_when(proposed_credit_limit_cat_ord == 1 ~ 200,
+                                          proposed_credit_limit_cat_ord == 2 ~ 500,
+                                          proposed_credit_limit_cat_ord == 3 ~ 1000,
+                                          proposed_credit_limit_cat_ord == 4 ~ 1500,
+                                          T ~ 2000))
 
 # Creacion datos de testeo -----------------
 
@@ -134,12 +143,29 @@ no_fraude <- no_fraude[sel_nofraude,]
 data_test <- rbind(fraude, no_fraude)
 
 
-data_test <- data_test |> select(-n, -proposed_credit_limit, -X)
+data_test <- data_test |> select(-n, -proposed_credit_limit, -X) |> 
+  mutate(income_ord = as.numeric(income),
+         proposed_credit_limit_cat_ord = as.numeric(proposed_credit_limit_cat),
+         income = income_ord/10,
+         proposed_credit_limit = case_when(proposed_credit_limit_cat_ord == 1 ~ 200,
+                                          proposed_credit_limit_cat_ord == 2 ~ 500,
+                                          proposed_credit_limit_cat_ord == 3 ~ 1000,
+                                          proposed_credit_limit_cat_ord == 4 ~ 1500,
+                                          T ~ 2000),
+         housing_status = case_when(housing_status %in% c("BD", "BE", "BF") ~ "Otro",
+                               T ~ housing_status),
+    
+          device_os = case_when(device_os == "x11" ~ "other",
+                          T ~ device_os),
+          customer_age = factor(case_when(customer_age %in% c(10,20) ~ "<20",
+                             customer_age %in% c(60,70) ~ ">60",
+                             T ~ as.character(customer_age))))
+
 
 
 
 # Saco variables inutiles
-data <- data |> select(-n, -proposed_credit_limit, -X)
+data <- data |> select(-n, -X)
 
 ```
 
@@ -147,13 +173,11 @@ data <- data |> select(-n, -proposed_credit_limit, -X)
 
 ## {.center}
 
-<!-- El fraude con tarjetas de crédito es una de las principales amenazas que sufren los bancos. Con el auge de la tecnología las transacciones digitales facilitaron los traspasos de dinero y los medios de pago electrónicos son algo de cada día, pero junto con las ventajas también vinieron las consecuencias, y es que los métodos de fraude se han vuelto más sofisticados, generando pérdidas significativas a los bancos y afectando la confianza de los usuarios. Actividades como el uso no autorizado de tarjetas, la clonación de datos y transacciones fraudulentas requieren el desarrollo de tecnologías avanzadas para la detección temprana y la prevención. -->
-
 El fraude con tarjetas de crédito es una de las principales amenazas que sufren los bancos. Con el auge las transacciones digitales y los medios de pago electrónicos, se facilitaron los traspasos de dinero, pero junto con las ventajas también vinieron las consecuencias, y es que los métodos de fraude se han vuelto más sofisticados, generando pérdidas significativas a los bancos y afectando la confianza de los usuarios. Actividades como el uso no autorizado de tarjetas, la clonación de datos y transacciones fraudulentas requieren el desarrollo de tecnologías avanzadas para la detección temprana y la prevención.
 
-##
+## {.smaller}
 
-#### Variables más relevantes
+### Variables más relevantes 
 
 - `fraud_bool`: Indicadora de si la transacción fue fraude o no
 
@@ -167,21 +191,21 @@ El fraude con tarjetas de crédito es una de las principales amenazas que sufren
 
 - `payment_type`: Tipo del plan de pago 
 
-##
-
 - `employment_status`: Estado de empleo del solicitante
 
 - `credit_risk_score`: Score de riesgo de la aplicación
 
 - `email_is_free`: Tipo del dominio del email del aplicante (email pago o gratis)
 
+## {.smaller}
+
+### Variables más relevantes 
+
 - `housing_status`: Estado residencial del aplicante
 
 - `phone_home_valid`: Validez del telefono fijo provisto
 
 - `phone_mobile_valid`: Validez del telefono movil provisto
-
-##
 
 - `has_other_cards`: Indicadora de si la persona tiene otra tarjeta en el mismo banco
 
@@ -199,70 +223,46 @@ El fraude con tarjetas de crédito es una de las principales amenazas que sufren
 
 ```{r}
 
-((data |> 
+dt1 <- data |> 
+  group_by(fraud_bool) |> 
+  summarise(n = n())
+
+
+(data |> 
+  ggplot() +
+  aes(x = fraud_bool, y = (after_stat(count))/sum(after_stat(count)))+
+  geom_bar(color = "black", fill = c("#4A5899", "#F2545B")) +
+  xlab(label = "Fraude") +
+  ylab(label = "Proporción") +
+  scale_y_continuous(limits = c(0,1)) +
+  scale_x_discrete(labels = c("0" = "No", "1" = "Sí")) +
+  geom_text(aes(label = after_stat(count), 
+                y = after_stat(count)/sum(after_stat(count)) + 0.02), 
+            stat = "count", 
+            size = 5,
+            vjust = 0,
+            color = "grey70")) +
+  ((data |> 
   filter(fraud_bool == 0) |> 
   ggplot() +
-  aes(x = as.numeric(income)/10, y = (after_stat(count))/sum(after_stat(count)))+
-  geom_bar(color = "black", fill = "#284B63") +
+  aes(x = income, y = (after_stat(count))/sum(after_stat(count)))+
+  geom_bar(color = "black", fill = "#4A5899") +
   xlab(label = "Ingreso anual") +
   ylab(label = "Proporción") +
   scale_x_continuous(breaks = seq(0.1,0.9,0.1)) +
   scale_y_continuous(limits = c(0,0.6)) +
-  ggtitle("No fraude")) +
+  ggtitle("No fraude")) /
 (data |> 
    filter(fraud_bool == 1) |> 
    ggplot() +
-   aes(x = as.numeric(income)/10, y = (after_stat(count))/sum(after_stat(count)))+
-   geom_bar(color = "black", fill = "#F15946") +
+   aes(x = income, y = (after_stat(count))/sum(after_stat(count)))+
+   geom_bar(color = "black", fill = "#F2545B") +
    xlab(label = "Ingreso anual") +
    ylab(label = "Proporción") +
    scale_y_continuous(limits = c(0,0.6)) +
    scale_x_continuous(breaks = seq(0.1,0.9,0.1)) +
-   ggtitle("Fraude"))) + plot_layout(axes = "collect") +
-  (data |> 
-  filter(fraud_bool == 0) |> 
-  ggplot() +
-  aes(x = name_email_similarity, y = after_stat(density))+
-  geom_histogram(bins = 15, color = "black", fill = "#284B63") +
-  scale_y_continuous(limits = c(0,3)) +
-  xlab(label = "Similitud nombre-email") +
-  ylab(label = "Densidad") +
-  ggtitle("No fraude")) +
-(data |> 
-  filter(fraud_bool == 1) |> 
-  ggplot() +
-  aes(x = name_email_similarity, y = after_stat(density))+
-  geom_histogram(bins = 15, color = "black", fill = "#F15946") +
-  scale_y_continuous(limits = c(0,3)) +
-  xlab(label = "Similitud nombre-email") +
-  ylab(label = "Densidad") +
-  ggtitle("Fraude")) + plot_layout(axes = "collect")
+   ggtitle("Fraude"))) + plot_layout(axes = "collect", widths = c())
 ```
-
-## Análisis descriptivo {.center}
-
-```{r}
-
-(data |> 
-  filter(fraud_bool == 0) |> 
-  ggplot() +
-  aes(x = payment_type, y = (after_stat(count))/sum(after_stat(count)))+
-  geom_bar(color = "black", fill = "#284B63") +
-  xlab(label = "Tipo del plan de pago") +
-  ylab(label = "Proporción") +
-  scale_y_continuous(limits = c(0,0.7)) +
-  ggtitle("No fraude")) +
-(data |> 
-  filter(fraud_bool == 1) |> 
-  ggplot() +
-  aes(x = payment_type, y = (after_stat(count))/sum(after_stat(count)))+
-  geom_bar(color = "black", fill = "#F15946") +
-  xlab(label = "Tipo del plan de pago") +
-  ylab(label = "Proporción") +
-  scale_y_continuous(limits = c(0,0.7)) +
-  ggtitle("Fraude")) + plot_layout(axes = "collect")
-```
-
 
 ## Análisis descriptivo {.center}
 
@@ -272,7 +272,7 @@ El fraude con tarjetas de crédito es una de las principales amenazas que sufren
   filter(fraud_bool == 0) |> 
   ggplot() +
   aes(x = proposed_credit_limit_cat, y = after_stat(count)/sum(after_stat(count)))+
-  geom_bar(color = "black", fill = "#284B63") +
+  geom_bar(color = "black", fill = "#4A5899") +
   xlab(label = "Crédito límite propuesto") +
   ylab(label = "Proporción") +
   scale_y_continuous(limits = c(0,0.65))+
@@ -281,7 +281,7 @@ El fraude con tarjetas de crédito es una de las principales amenazas que sufren
   filter(fraud_bool == 1) |> 
   ggplot() +
   aes(x = proposed_credit_limit_cat, y = after_stat(count)/sum(after_stat(count)))+
-  geom_bar(color = "black", fill = "#F15946") +
+  geom_bar(color = "black", fill = "#F2545B") +
   xlab(label = "Crédito límite propuesto") +
   ylab(label = "Proporción") +
   scale_y_continuous(limits = c(0,0.65))+
@@ -290,7 +290,7 @@ El fraude con tarjetas de crédito es una de las principales amenazas que sufren
   filter(fraud_bool == 0) |> 
   ggplot() +
   aes(x = payment_type, y = (after_stat(count))/sum(after_stat(count)))+
-  geom_bar(color = "black", fill = "#284B63") +
+  geom_bar(color = "black", fill = "#4A5899") +
   xlab(label = "Tipo del plan de pago") +
   ylab(label = "Proporción") +
   scale_y_continuous(limits = c(0,0.7)) +
@@ -299,7 +299,7 @@ El fraude con tarjetas de crédito es una de las principales amenazas que sufren
   filter(fraud_bool == 1) |> 
   ggplot() +
   aes(x = payment_type, y = (after_stat(count))/sum(after_stat(count)))+
-  geom_bar(color = "black", fill = "#F15946") +
+  geom_bar(color = "black", fill = "#F2545B") +
   xlab(label = "Tipo del plan de pago") +
   ylab(label = "Proporción") +
   scale_y_continuous(limits = c(0,0.7)) +
@@ -308,7 +308,7 @@ El fraude con tarjetas de crédito es una de las principales amenazas que sufren
 #     filter(fraud_bool == 0) |> 
 #     ggplot() +
 #     aes(x = credit_risk_score, y = after_stat(count)/sum(after_stat(count)))+
-#     geom_histogram(fill = "#284B63", color = "black", bins = 20)+
+#     geom_histogram(fill = "#4A5899", color = "black", bins = 20)+
 #     scale_y_continuous(limits = c(0, 0.2)) +
 #     xlab(label = "Score de riesgo crediticio") +
 #     ylab(label = "Densidad") +
@@ -317,7 +317,7 @@ El fraude con tarjetas de crédito es una de las principales amenazas que sufren
 #     filter(fraud_bool == 1) |> 
 #     ggplot() +
 #     aes(x = credit_risk_score, y = after_stat(count)/sum(after_stat(count)))+
-#     geom_histogram(fill = "#F15946", color = "black", bins = 20)+
+#     geom_histogram(fill = "#F2545B", color = "black", bins = 20)+
 #     scale_y_continuous(limits = c(0, 0.2)) +
 #     xlab(label = "Score de riesgo crediticio") +
 #     ylab(label = "Densidad") +
@@ -338,21 +338,21 @@ El fraude con tarjetas de crédito es una de las principales amenazas que sufren
   xlab(label = "Tenencia de otras tarjetas") +
   ylab(label = "Proporción") +
   labs(fill = "Fraude") +
-  scale_fill_manual(values = c("#284B63","#F15946"),labels = c("No","Si")) +
+  scale_fill_manual(values = c("#4A5899","#F2545B"),labels = c("No","Si")) +
   scale_x_discrete(labels = c("0" = "No","1" = "Si")) +
   scale_y_continuous(limits = c(0,1))) +
   (data |> 
-   group_by(fraud_bool, foreign_request) |> 
+   group_by(fraud_bool, device_distinct_emails_8w) |> 
    summarise(prop = n()) |> 
    mutate(prop = prop/sum(prop)) |> 
   ggplot() +
-  aes(x = foreign_request, y = prop, fill = fraud_bool, group = fraud_bool)+
+  aes(x = device_distinct_emails_8w, y = prop, fill = fraud_bool, group = fraud_bool)+
   geom_bar(color = "black", position = "dodge", stat = "identity") +
-  xlab(label = "Solicitud extranjera") +
+  xlab(label = "Número de emails distintos en la página\ndel banco en las últimas 8 semanas") +
   ylab(label = "Proporción") +
   labs(fill = "Fraude") +
-  scale_fill_manual(values = c("#284B63","#F15946"),labels = c("No","Si")) +
-  scale_x_discrete(labels = c("0" = "No","1" = "Si")) +
+  scale_fill_manual(values = c("#4A5899","#F2545B"),labels = c("No","Si")) +
+  scale_x_continuous(breaks = c(1,2)) +
   scale_y_continuous(limits = c(0,1)))
 ```
 
@@ -371,7 +371,7 @@ El fraude con tarjetas de crédito es una de las principales amenazas que sufren
   xlab(label = "Dominio del email") +
   ylab(label = "Proporción") +
   labs(fill = "Fraude") +
-  scale_fill_manual(values = c("0" = "#284B63", "1" = "#F15946"),labels = c("No","Si")) +
+  scale_fill_manual(values = c("0" = "#4A5899", "1" = "#F2545B"),labels = c("No","Si")) +
   scale_x_discrete(labels = c("0" = "Pago","1" = "Gratuito")) +
   scale_y_continuous(limits = c(0,1))) +
   (data |> 
@@ -384,25 +384,102 @@ El fraude con tarjetas de crédito es una de las principales amenazas que sufren
   xlab(label = "Mantener sesión abierta") +
   ylab(label = "Proporción") +
   labs(fill = "Fraude") +
-  scale_fill_manual(values = c("0" = "#284B63", "1" = "#F15946"),labels = c("No","Si")) +
+  scale_fill_manual(values = c("0" = "#4A5899", "1" = "#F2545B"),labels = c("No","Si")) +
   scale_x_discrete(labels = c("0" = "No","1" = "Si")) +
   scale_y_continuous(limits = c(0,1)))
+```
+
+## Análisis descriptivo {.center}
+
+```{r}
+(data |> 
+  filter(fraud_bool == 0) |> 
+  ggplot() +
+  aes(x = device_os, y = after_stat(count)/sum(after_stat(count)))+
+  geom_bar(color = "black", fill = "#4A5899") +
+  xlab(label = "Sistema operativo del dispositivo utilizado") +
+  ylab(label = "Proporción") +
+  geom_text(aes(label = after_stat(count), 
+                y = after_stat(count)/sum(after_stat(count)) + 0.02), 
+            stat = "count", 
+            size = 5,
+            vjust = 0,
+            color = "grey70") +
+  scale_y_continuous(limits = c(0,0.65))+
+  ggtitle("No fraude")) +
+(data |> 
+  filter(fraud_bool == 1) |> 
+  ggplot() +
+  aes(x = device_os, y = after_stat(count)/sum(after_stat(count)))+
+  geom_bar(color = "black", fill = "#F2545B") +
+  xlab(label = "Sistema operativo del dispositivo utilizado") +
+  ylab(label = "Proporción") +
+  scale_y_continuous(limits = c(0,0.65))+
+  ggtitle("Fraude") +
+   geom_text(aes(label = after_stat(count), 
+                y = after_stat(count)/sum(after_stat(count)) + 0.02), 
+            stat = "count", 
+            size = 5,
+            vjust = 0,
+            color = "grey70")) + plot_layout(axes = "collect") +
+  (data |> 
+  filter(fraud_bool == 0) |> 
+  ggplot() +
+  aes(x = housing_status, y = after_stat(count)/sum(after_stat(count)))+
+  geom_bar(color = "black", fill = "#4A5899") +
+  xlab(label = "Estado residencial del cliente") +
+  ylab(label = "Proporción") +
+  geom_text(aes(label = after_stat(count), 
+                y = after_stat(count)/sum(after_stat(count)) + 0.02), 
+            stat = "count", 
+            size = 5,
+            vjust = 0,
+            color = "grey70") +
+  scale_y_continuous(limits = c(0,0.65))+
+  ggtitle("No fraude")) +
+(data |> 
+  filter(fraud_bool == 1) |> 
+  ggplot() +
+  aes(x = housing_status, y = after_stat(count)/sum(after_stat(count)))+
+  geom_bar(color = "black", fill = "#F2545B") +
+  xlab(label = "Estado residencial del cliente") +
+  ylab(label = "Proporción") +
+  scale_y_continuous(limits = c(0,0.65))+
+  ggtitle("Fraude") +
+   geom_text(aes(label = after_stat(count), 
+                y = after_stat(count)/sum(after_stat(count)) + 0.02), 
+            stat = "count", 
+            size = 5,
+            vjust = 0,
+            color = "grey70")) + plot_layout(axes = "collect")
 ```
 
 
 ## Modelo seleccionado
 
 $$
-logit(\pi_i) = \beta_0 + \overbrace{\beta_I\cdot I_i}^{\text{Ingreso}} + \\ + \overbrace{\beta_{H1}\cdot H_{1i} + \beta_{H2}\cdot H_{2i} + \beta_{H3}\cdot H_{3i} + \beta_{H4}\cdot H_{4i} + \beta_{H5}\cdot H_{5i}}^{\text{Estado residencial}} + \\ +\overbrace{\beta_{Ph}\cdot Ph_i}^{\text{Validez tel. fijo}} + \overbrace{\beta_{Pm}\cdot Pm_i}^{\text{Validez celular}} + \overbrace{\beta_C\cdot C_i}^{\text{Otras tarjetas}} + \overbrace{\beta_L\cdot L_i}^{\text{Lim. crediticio}} + \\ + \overbrace{\beta_{D1}\cdot D_{1i} + \beta_{D2}\cdot D_{2i} + \beta_{D3}\cdot D_{3i} + \beta_{D4}\cdot D_{4i}}^{\text{Sistitema operativo del dispositivo}} + \\ +\overbrace{\beta_E\cdot E_i}^{\text{Emails}} + \beta_{IPm}\cdot I_i\cdot Pm_i + \beta_{CPm}\cdot C_i\cdot Pm_i 
+logit(\pi_i) = \beta_0 + \overbrace{\beta_I\cdot I_i}^{\text{Ingreso}} + \overbrace{\beta_{H1}\cdot H_{1i} + \beta_{H2}\cdot H_{2i} + \beta_{H3}\cdot H_{3i}}^{\text{Estado residencial}} + \\ +\overbrace{\beta_{Ph}\cdot Ph_i}^{\text{Validez tel. fijo}} + \overbrace{\beta_{Pm}\cdot Pm_i}^{\text{Validez celular}} + \overbrace{\beta_C\cdot C_i}^{\text{Otras tarjetas}} + \overbrace{\beta_L\cdot L_i}^{\text{Lim. crediticio}} + \\ + \overbrace{\beta_{D1}\cdot D_{1i} + \beta_{D2}\cdot D_{2i} + \beta_{D3}\cdot D_{3i}}^{\text{Sistitema operativo del dispositivo}} + \overbrace{\beta_E\cdot E_i}^{\text{Nº e-mails}}
 $$
 
-## Comprobación del enlace {.center .bigger}
+## Comprobación del enlace {.bigger}
 
 
 ```{r}
+data <- data |> 
+  mutate(
+    housing_status = case_when(housing_status %in% c("BD", "BE", "BF") ~ "Otro",
+                               T ~ housing_status),
+    
+    device_os = case_when(device_os == "x11" ~ "other",
+                          T ~ device_os),
+    customer_age = factor(case_when(customer_age %in% c(10,20) ~ "<20",
+                             customer_age %in% c(60,70) ~ ">60",
+                             T ~ as.character(customer_age)))
+  )
+
 modelo_logit <- glm(fraud_bool ~ income + housing_status + 
     phone_home_valid + phone_mobile_valid + has_other_cards + 
-    proposed_credit_limit_cat + device_os + device_distinct_emails_8w, 
+    proposed_credit_limit + device_os + device_distinct_emails_8w, 
     data = data, 
     family = binomial(link = "logit"), 
     na.action = na.omit)
@@ -415,7 +492,7 @@ data_enlaces$pred.2.logit <- pred.logit*pred.logit
 
 modelo_logit.2 <- glm(fraud_bool ~ income + housing_status + 
     phone_home_valid + phone_mobile_valid + has_other_cards + 
-    proposed_credit_limit_cat + device_os + device_distinct_emails_8w + pred.2.logit,
+    proposed_credit_limit + device_os + device_distinct_emails_8w + pred.2.logit,
     data = data_enlaces,
     family = binomial(link = "logit"),
     na.action = na.omit)
@@ -427,14 +504,14 @@ modelo_logit.2 <- glm(fraud_bool ~ income + housing_status +
 # Comprobacion enlace probit --------------------
 modelo_probit <- glm(fraud_bool ~ income + housing_status + 
     phone_home_valid + phone_mobile_valid + has_other_cards + 
-    proposed_credit_limit_cat + device_os + device_distinct_emails_8w, data = data, family = binomial(link = "probit"), na.action = na.omit)
+    proposed_credit_limit + device_os + device_distinct_emails_8w, data = data, family = binomial(link = "probit"), na.action = na.omit)
 
 pred.probit <- predict(modelo_probit)
 data_enlaces$pred.2.probit <- pred.probit*pred.probit
 
 modelo_probit.2 <- glm(fraud_bool ~ income + housing_status + 
     phone_home_valid + phone_mobile_valid + has_other_cards + 
-    proposed_credit_limit_cat + device_os + device_distinct_emails_8w + pred.2.probit,
+    proposed_credit_limit + device_os + device_distinct_emails_8w + pred.2.probit,
     data = data_enlaces,
     family = binomial(link = "probit"),
     na.action = na.omit)
@@ -446,14 +523,14 @@ modelo_probit.2 <- glm(fraud_bool ~ income + housing_status +
 # Comprobacion enlace cloglog --------------------
 modelo_cloglog <- glm(fraud_bool ~ income + housing_status + 
     phone_home_valid + phone_mobile_valid + has_other_cards + 
-    proposed_credit_limit_cat + device_os + device_distinct_emails_8w, data = data, family = binomial(link = "cloglog"), na.action = na.omit)
+    proposed_credit_limit + device_os + device_distinct_emails_8w, data = data, family = binomial(link = "cloglog"), na.action = na.omit)
 
 pred.cloglog <- predict(modelo_cloglog)
 data_enlaces$pred.2.cloglog <- pred.cloglog*pred.cloglog
 
 modelo_cloglog.2 <- glm(fraud_bool ~ income + housing_status + 
     phone_home_valid + phone_mobile_valid + has_other_cards + 
-    proposed_credit_limit_cat + device_os + device_distinct_emails_8w + pred.2.cloglog,
+    proposed_credit_limit + device_os + device_distinct_emails_8w + pred.2.cloglog,
     data = data_enlaces,
     family = binomial(link = "cloglog"),
     na.action = na.omit)
@@ -471,72 +548,67 @@ hltest(modelo_logit, verbose = F)
   overflow:hidden;padding:10px 5px;word-break:normal;}
 .tg th{border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;
   font-weight:normal;overflow:hidden;padding:10px 5px;word-break:normal;}
-.tg .tg-49rs{border-color:inherit;font-size:large;text-align:center;vertical-align:top}
+.tg .tg-x3s1{border-color:inherit;font-size:xx-large;text-align:center;vertical-align:top}
 </style>
 <table class="tg"><thead>
   <tr>
-    <th class="tg-49rs">Enlace</th>
-    <th class="tg-49rs">Estadistica</th>
-    <th class="tg-49rs">Grados de libertad</th>
-    <th class="tg-49rs">Valor p</th>
+    <th class="tg-x3s1">Enlace</th>
+    <th class="tg-x3s1">Estadistica<br>test RV</th>
+    <th class="tg-x3s1">Grados de libertad<br>test RV</th>
+    <th class="tg-x3s1">Valor p<br>test RV</th>
+    <th class="tg-x3s1">Estadistica<br>test H-L</th>
+    <th class="tg-x3s1">Grados de libertad<br>test H-L</th>
+    <th class="tg-x3s1">Valor p <br>test H-L</th>
   </tr></thead>
 <tbody>
   <tr>
-    <td class="tg-49rs">Logístico</td>
-    <td class="tg-49rs">0.28314</td>
-    <td class="tg-49rs">1</td>
-    <td class="tg-49rs">0.5947</td>
+    <td class="tg-x3s1">Logístico</td>
+    <td class="tg-x3s1">0.8010</td>
+    <td class="tg-x3s1">1</td>
+    <td class="tg-x3s1">0.3708</td>
+    <td class="tg-x3s1">2.7342</td>
+    <td class="tg-x3s1">8</td>
+    <td class="tg-x3s1">0.9499</td>
   </tr>
   <tr>
-    <td class="tg-49rs">Probit</td>
-    <td class="tg-49rs">0.49868</td>
-    <td class="tg-49rs">1</td>
-    <td class="tg-49rs">0.4801</td>
+    <td class="tg-x3s1">Probit</td>
+    <td class="tg-x3s1">1.9706</td>
+    <td class="tg-x3s1">1</td>
+    <td class="tg-x3s1">0.1604</td>
+    <td class="tg-x3s1">5.7644</td>
+    <td class="tg-x3s1">8</td>
+    <td class="tg-x3s1">0.6736</td>
   </tr>
   <tr>
-    <td class="tg-49rs">Cloglog</td>
-    <td class="tg-49rs">0.01148</td>
-    <td class="tg-49rs">1</td>
-    <td class="tg-49rs">0.9147</td>
+    <td class="tg-x3s1">Cloglog</td>
+    <td class="tg-x3s1">0.0015</td>
+    <td class="tg-x3s1">1</td>
+    <td class="tg-x3s1">0.9682</td>
+    <td class="tg-x3s1">2.6860</td>
+    <td class="tg-x3s1">8</td>
+    <td class="tg-x3s1">0.9525</td>
   </tr>
-</tbody>
-</table>
+</tbody></table>
 
-
-Valor p del test de bondad del ajuste de Hosmer-Lemeshow para el modelo Logístico: 
-
-. . .
-
-$$0.80938$$
 
 ## Análisis de residuos {.center}
 
-### Evaluación de la componente sistemática ARREGLAR {.center}
+### Evaluación de la componente sistemática {.center}
 
 ```{r}
 # Residuos cuantil
 rQ.logit <- qresid(modelo_logit)
 
-# Mu estimado
-mu_logit <- fitted(modelo_logit)
-
 ### Gráfico de residuos cuantil vs. probabilidades estimadas (ajuste logit)
-G1 <- ggplot(data_enlaces, aes(y = rQ.logit, x = fitted(modelo_probit))) + 
-  geom_point(fill = "orange", shape = 21, size = 3, alpha = 0.4) +
-  geom_hline(yintercept = 0, color = "grey80") + 
-  geom_hline(yintercept = -3, linetype = "dashed", color = "grey80") + 
-  geom_hline(yintercept =  3, linetype = "dashed", color = "grey80") +
-  labs(title = "Gráfico de residuos cuantil vs.\nlas probabilidades estimadas", x = expression(hat(pi)), y = "Residuos cuantil")
+G1 <- ggplot(data_enlaces, aes(y = rQ.logit, x = fitted(modelo_logit))) + 
+  geom_point(fill = "#F2545B", shape = 21, size = 3, alpha = 0.4) +
+  geom_hline(yintercept = 0) + 
+  # ylim(-3, 3) + 
+  geom_hline(yintercept = -3, linetype = "dashed") + 
+  geom_hline(yintercept =  3, linetype = "dashed") +
+  labs(x = expression(hat(pi)), y = "Residuos cuantil")
 
-### Gráfico de residuos cuantil vs. la media estimada (ajuste logit)
-G2 <- ggplot(data_enlaces, aes(y = rQ.logit, x = mu_logit)) + 
-  geom_point(fill = "orange", shape = 21, size = 3, alpha = 0.4) +
-  geom_hline(yintercept = 0, color = "grey80") + 
-  geom_hline(yintercept = -3, linetype = "dashed", color = "grey80") + 
-  geom_hline(yintercept =  3, linetype = "dashed", color = "grey80") +
-  labs(title = "Gráfico de residuos cuantil vs.\nlas medias estimadas", x = expression(hat(mu)), y = "Residuos cuantil")
-
-G1+G2
+G1
 ```
 
 ## Análisis de residuos {.center}
@@ -546,7 +618,7 @@ G1+G2
 
 # Gráfico QQ
 ggplot(data_enlaces, aes(sample = rQ.logit)) +
-  stat_qq(distribution = qnorm, fill = "orange", shape = 21, size = 3, alpha = 0.4) +
+  stat_qq(distribution = qnorm, fill = "#F2545B", shape = 21, size = 3, alpha = 0.4) +
   stat_qq_line(color = "grey90") +
   annotate(geom = "label", label = paste("Test de Normalidad Shapiro-Wilks\n p-value:", round(shapiro.test(rQ.logit)$p.value, 2)), x = 0.9, y = -1.5, fill = "grey13", color = "grey90") +
   labs(title = "Gráfico probabilístico normal con residuos cuantil",  x = "Cuantiles teóricos", y = "Cuantiles de los residuos cuantil")
@@ -556,6 +628,44 @@ ggplot(data_enlaces, aes(sample = rQ.logit)) +
 
 
 ## Interpretaciones
+
+```{r RO modelo sin interacciones}
+#| tbl-cap: "Razones de odds del modelo ajustado"
+x <- summary(modelo_logit)
+
+tabla_ro <- data.frame(
+  RO = c(
+    "Límite propuesto",
+    "Teléfono fijo:Válido",
+    "Ingreso",
+    "Tenencia otra tarjeta"
+  ),
+  Estimación = c(
+                 exp(as.numeric(modelo_logit$coefficients["proposed_credit_limit"])*100),
+                 exp(as.numeric(modelo_logit$coefficients["phone_home_valid1"])),
+                 exp(as.numeric(modelo_logit$coefficients["income"])*0.1),
+                 exp(as.numeric(modelo_logit$coefficients["has_other_cards1"]))
+                 ),
+  LI = c(
+    exp(as.numeric(modelo_logit$coefficients["proposed_credit_limit"])*100 - 1.96 * 100 * x$coefficients["proposed_credit_limit",2]),
+    exp(as.numeric(modelo_logit$coefficients["phone_home_valid1"]) - 1.96 * x$coefficients["phone_home_valid1",2]),
+    exp(as.numeric(modelo_logit$coefficients["income"])*0.1 - 1.96 * 0.1 * x$coefficients["income",2]),
+    exp(as.numeric(modelo_logit$coefficients["has_other_cards1"]) - 1.96 * x$coefficients["has_other_cards1",2])
+    ),
+  LS = c(
+    exp(as.numeric(modelo_logit$coefficients["proposed_credit_limit"])*100 + 1.96 * 100 * x$coefficients["proposed_credit_limit",2]),
+    exp(as.numeric(modelo_logit$coefficients["phone_home_valid1"]) + 1.96 * x$coefficients["phone_home_valid1",2]),
+    exp(as.numeric(modelo_logit$coefficients["income"])*0.1 + 1.96 * 0.1 * x$coefficients["income",2]),
+    exp(as.numeric(modelo_logit$coefficients["has_other_cards1"]) + 1.96 * x$coefficients["has_other_cards1",2])
+    )
+  
+)
+
+knitr::kable(tabla_ro, digits = 4)
+```
+
+## Perfiles destacados
+
 
 
 ## Evaluación de la capacidad predictiva {.center}
@@ -576,7 +686,7 @@ data.frame(especificidad = curva_roc_knn$specificities,
   geom_line(aes(x = especificidad, y = sensibilidad), color = "grey90") +
   scale_x_reverse() +
   geom_segment(x = -1, xend=0, y = 0, yend = 1, color = "grey90") +
-  annotate(x = 0.45, y = 0.75, geom = "text", label = paste("AUC =", round(curva_roc_knn$auc, digits = 4)), color = "grey90") +
+  annotate(x = 0.8, y = 0.4, geom = "text", label = paste("AUC =", round(curva_roc_knn$auc, digits = 4)), color = "grey90") +
   geom_mark_ellipse(
     aes(x = best_knn$specificity, y = best_knn$sensitivity,
       label = format(round(as.numeric(best_knn$threshold), digits = 6), scientific = F),
@@ -590,12 +700,87 @@ data.frame(especificidad = curva_roc_knn$specificities,
 
 ```
 
-##
+## 
 
-```{r}
+#### Matriz de confusión del modelo ajustado ante nuevos clientes
+
+```{r capacidad predictiva modelo sin interaccion}
 prob_pred <- exp(predict(modelo_logit, newdata = data_test))/(1+exp(predict(modelo_logit, newdata = data_test)))
 
 fraud_pred <- factor(ifelse(prob_pred >= best_knn$threshold, 1, 0), levels = c(0,1))
 
-confusionMatrix(fraud_pred, reference = data_test$fraud_bool, positive = "1")
+# confusionMatrix(fraud_pred, reference = data_test$fraud_bool, positive = "1")
+
+matriz_confucion <- confusionMatrix(fraud_pred, reference = data_test$fraud_bool, positive = "1")
 ```
+
+
+```{r capacidad predictiva modelo sin interaccion 2}
+data.frame(matriz_confucion$table) |> 
+  mutate(Prediction = case_when(Prediction == 0 ~ "No fraude",
+                                T ~ "Fraude"),
+         Reference = case_when(Reference == 0 ~ "No fraude",
+                                T ~ "Fraude")) |> 
+  ggplot() +
+  aes(x = Prediction, y = Reference, fill = Freq, label = Freq) +
+  geom_tile(color = "black") +
+  geom_label(color = "black") +
+  scale_fill_gradient(low = "#cfeac8", high = "#017A39") +
+  labs(x = "Valor Predicho", y = "Valor Observado",
+       caption = paste0("Precisión: ", round(matriz_confucion$overall[1], 2), "        |        ",
+                        "Sensibilidad: ", round(matriz_confucion$byClass[1], 2), "        |        ",
+                        "Especificidad: ", round(matriz_confucion$byClass[2], 2) 
+                        )) +
+  theme(legend.position = "none",
+        plot.caption = element_text(hjust=0.5,size = 11))
+```
+
+## 
+
+#### Matriz de confusión del modelo con interacciones ante nuevos clientes
+
+```{r capacidad predictiva modelo con interaccion}
+modelo_logit_3 <- glm(fraud_bool ~ income + housing_status + 
+    phone_home_valid + phone_mobile_valid + has_other_cards + 
+    proposed_credit_limit + device_os + device_distinct_emails_8w + income:phone_mobile_valid + has_other_cards:phone_mobile_valid, 
+    data = data, 
+    family = binomial(link = "logit"), 
+    na.action = na.omit)
+
+curva_roc_knn <- roc(response = data$fraud_bool, predictor = fitted(modelo_logit_3), plot = F)
+
+best_knn <- coords(curva_roc_knn, "local maximas")[7,]
+
+prob_pred <- exp(predict(modelo_logit_3, newdata = data_test))/(1+exp(predict(modelo_logit_3, newdata = data_test)))
+
+fraud_pred <- factor(ifelse(prob_pred >= best_knn$threshold, 1, 0), levels = c(0,1))
+
+matriz_confucion <- confusionMatrix(fraud_pred, reference = data_test$fraud_bool, positive = "1")
+```
+
+
+```{r capacidad predictiva modelo con interaccion 2}
+data.frame(matriz_confucion$table) |> 
+  mutate(Prediction = case_when(Prediction == 0 ~ "No fraude",
+                                T ~ "Fraude"),
+         Reference = case_when(Reference == 0 ~ "No fraude",
+                                T ~ "Fraude")) |> 
+  ggplot() +
+  aes(x = Prediction, y = Reference, fill = Freq, label = Freq) +
+  geom_tile(color = "black") +
+  geom_label(color = "black") +
+  scale_fill_gradient(low = "#cfeac8", high = "#017A39") +
+  labs(x = "Valor Predicho", y = "Valor Observado",
+       caption = paste0("Precisión: ", round(matriz_confucion$overall[1], 2), "        |        ",
+                        "Sensibilidad: ", round(matriz_confucion$byClass[1], 2), "        |        ",
+                        "Especificidad: ", round(matriz_confucion$byClass[2], 2) 
+                        )) +
+  theme(legend.position = "none",
+        plot.caption = element_text(hjust=0.5,size = 11))
+```
+
+
+
+
+## ¡¡¡Gracias por su atención!!! 😃😃😃 {.center}
+

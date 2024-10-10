@@ -666,7 +666,7 @@ knitr::kable(tabla_ro, digits = 4)
 
 ## Perfiles destacados
 
-
+![](Imgs/fraude.png)
 
 ## Evaluación de la capacidad predictiva {.center}
 

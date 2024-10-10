@@ -67,7 +67,9 @@ knitr::include_graphics("Imgs/unr.jpeg")
 
 # Introducción
 
-El fraude con tarjetas de crédito es una de las principales amenazas que sufren los bancos. Con el auge de la tecnología las transacciones digitales facilitaron los traspasos de dinero y los medios de pago electrónicos son algo de cada día, pero junto con las ventajas también vinieron las consecuencias, y es que los métodos de fraude se han vuelto más sofisticados, generando pérdidas significativas a los bancos y afectando la confianza de los usuarios. Actividades como el uso no autorizado de tarjetas, la clonación de datos y transacciones fraudulentas requieren el desarrollo de tecnologías avanzadas para la detección temprana y la prevención.
+<!-- El fraude con tarjetas de crédito es una de las principales amenazas que sufren los bancos. Con el auge de la tecnología las transacciones digitales facilitaron los traspasos de dinero y los medios de pago electrónicos son algo de cada día, pero junto con las ventajas también vinieron las consecuencias, y es que los métodos de fraude se han vuelto más sofisticados, generando pérdidas significativas a los bancos y afectando la confianza de los usuarios. Actividades como el uso no autorizado de tarjetas, la clonación de datos y transacciones fraudulentas requieren el desarrollo de tecnologías avanzadas para la detección temprana y la prevención. -->
+
+El fraude con tarjetas de crédito es una de las principales amenazas que sufren los bancos. Con el auge las transacciones digitales y los medios de pago electrónicos, se facilitaron los traspasos de dinero, pero junto con las ventajas también vinieron las consecuencias, y es que los métodos de fraude se han vuelto más sofisticados, generando pérdidas significativas a los bancos y afectando la confianza de los usuarios. Actividades como el uso no autorizado de tarjetas, la clonación de datos y transacciones fraudulentas requieren el desarrollo de tecnologías avanzadas para la detección temprana y la prevención.
 
 # Variables:
 
@@ -119,13 +121,13 @@ El fraude con tarjetas de crédito es una de las principales amenazas que sufren
 
 - `proposed_credit_limit`: Crédito limite propuesto por el aplicante
 
-- `foreign_request`: Indicadora de si la solicitud fue hecha en el mismo pais que el banco
+- `foreign_request`: Indicadora de si la solicitud fue hecha en el pais del banco
 
 <!-- - `source`: Fuente online de la aplicación (Internet / app movil)  -->
 
 <!-- - `session_length_in_minutes`: Tiempo de la sesión en la página del banco en minutos -->
 
-- `device_os`: Sistema operativo del dispositivo que hizo la solicitud
+- `device_os`: Sistema operativo del dispositivo desde el que se hizo la solicitud
 
 - `keep_alive_session`: Indicadora de si el solicitante decidió mantener la sesión iniciada al ingresar
 

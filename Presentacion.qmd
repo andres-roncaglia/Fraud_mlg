@@ -1,5 +1,6 @@
 ---
-title: "Modelos lineales generalizados para la detección de fraude en bancos"
+title: "Predicción de fraude financiero"
+subtitle: "Un análisis mediante modelos lineales generalizados"
 format: 
   revealjs:
     theme: dark
@@ -160,25 +161,35 @@ El fraude con tarjetas de crédito es una de las principales amenazas que sufren
 
 - `name_email_similarity`: Similitud del nombre en el email y el nombre del solicitante
 
+- `customer_age`: Edad del cliente en décadas
+
+- `days_since_request`: Días desde la solicitud
+
 - `payment_type`: Tipo del plan de pago 
+
+##
+
+- `employment_status`: Estado de empleo del solicitante
 
 - `credit_risk_score`: Score de riesgo de la aplicación
 
 - `email_is_free`: Tipo del dominio del email del aplicante (email pago o gratis)
 
-- `phone_home_valid`: Validez del telefono fijo provisto
+- `housing_status`: Estado residencial del aplicante
 
-##
+- `phone_home_valid`: Validez del telefono fijo provisto
 
 - `phone_mobile_valid`: Validez del telefono movil provisto
 
-- `has_other_cards`: Indicador de si la persona tiene otra tarjeta en el mismo banco
+##
+
+- `has_other_cards`: Indicadora de si la persona tiene otra tarjeta en el mismo banco
 
 - `proposed_credit_limit`: Crédito limite propuesto por el aplicante
 
-- `foreign_request`: Indicadora de si la solicitud fue hecha en el mismo pais que el banco
+- `foreign_request`: Indicadora de si la solicitud fue hecha en el pais del banco
 
-- `device_os`: Sistema operativo del dispositivo que hizo la solicitud
+- `device_os`: Sistema operativo del dispositivo desde el que se hizo la solicitud
 
 - `keep_alive_session`: Indicadora de si el solicitante decidió mantener la sesión iniciada al ingresar
 
@@ -274,25 +285,43 @@ El fraude con tarjetas de crédito es una de las principales amenazas que sufren
   xlab(label = "Crédito límite propuesto") +
   ylab(label = "Proporción") +
   scale_y_continuous(limits = c(0,0.65))+
-  ggtitle("Fraude")) + plot_layout(axes = "collect") +
+  ggtitle("Fraude")) + plot_layout(axes = "collect") + # desde acá
   (data |> 
-    filter(fraud_bool == 0) |> 
-    ggplot() +
-    aes(x = credit_risk_score, y = after_stat(count)/sum(after_stat(count)))+
-    geom_histogram(fill = "#284B63", color = "black", bins = 20)+
-    scale_y_continuous(limits = c(0, 0.2)) +
-    xlab(label = "Score de riesgo crediticio") +
-    ylab(label = "Densidad") +
-    ggtitle("No fraude")) +
+  filter(fraud_bool == 0) |> 
+  ggplot() +
+  aes(x = payment_type, y = (after_stat(count))/sum(after_stat(count)))+
+  geom_bar(color = "black", fill = "#284B63") +
+  xlab(label = "Tipo del plan de pago") +
+  ylab(label = "Proporción") +
+  scale_y_continuous(limits = c(0,0.7)) +
+  ggtitle("No fraude")) +
 (data |> 
-    filter(fraud_bool == 1) |> 
-    ggplot() +
-    aes(x = credit_risk_score, y = after_stat(count)/sum(after_stat(count)))+
-    geom_histogram(fill = "#F15946", color = "black", bins = 20)+
-    scale_y_continuous(limits = c(0, 0.2)) +
-    xlab(label = "Score de riesgo crediticio") +
-    ylab(label = "Densidad") +
-    ggtitle("Fraude")) + plot_layout(axes = "collect")
+  filter(fraud_bool == 1) |> 
+  ggplot() +
+  aes(x = payment_type, y = (after_stat(count))/sum(after_stat(count)))+
+  geom_bar(color = "black", fill = "#F15946") +
+  xlab(label = "Tipo del plan de pago") +
+  ylab(label = "Proporción") +
+  scale_y_continuous(limits = c(0,0.7)) +
+  ggtitle("Fraude")) + plot_layout(axes = "collect")
+#   (data |> 
+#     filter(fraud_bool == 0) |> 
+#     ggplot() +
+#     aes(x = credit_risk_score, y = after_stat(count)/sum(after_stat(count)))+
+#     geom_histogram(fill = "#284B63", color = "black", bins = 20)+
+#     scale_y_continuous(limits = c(0, 0.2)) +
+#     xlab(label = "Score de riesgo crediticio") +
+#     ylab(label = "Densidad") +
+#     ggtitle("No fraude")) +
+# (data |> 
+#     filter(fraud_bool == 1) |> 
+#     ggplot() +
+#     aes(x = credit_risk_score, y = after_stat(count)/sum(after_stat(count)))+
+#     geom_histogram(fill = "#F15946", color = "black", bins = 20)+
+#     scale_y_continuous(limits = c(0, 0.2)) +
+#     xlab(label = "Score de riesgo crediticio") +
+#     ylab(label = "Densidad") +
+#     ggtitle("Fraude")) + plot_layout(axes = "collect")
 ```
 
 ## Análisis descriptivo {.center}

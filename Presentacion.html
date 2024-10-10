@@ -8,10 +8,10 @@
 <link href="Presentacion_files/libs/quarto-html/light-border.css" rel="stylesheet">
 <link href="Presentacion_files/libs/quarto-html/quarto-html.min.css" rel="stylesheet" data-mode="light">
 <link href="Presentacion_files/libs/quarto-html/quarto-syntax-highlighting-dark.css" rel="stylesheet" id="quarto-text-highlighting-styles"><meta charset="utf-8">
-  <meta name="generator" content="quarto-1.4.551">
+  <meta name="generator" content="quarto-1.4.554">
 
   <meta name="author" content="Gamboa Nicolas - Roncaglia Andrés - Santini Franco">
-  <title>Modelos lineales generalizados para la detección de fraude en bancos</title>
+  <title>Predicción de fraude financiero</title>
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
@@ -326,7 +326,8 @@
     <div class="slides">
 
 <section id="title-slide" class="quarto-title-block center">
-  <h1 class="title">Modelos lineales generalizados para la detección de fraude en bancos</h1>
+  <h1 class="title">Predicción de fraude financiero</h1>
+  <p class="subtitle">Un análisis mediante modelos lineales generalizados</p>
 
 <div class="quarto-title-authors">
 <div class="quarto-title-author">
@@ -339,7 +340,8 @@ Gamboa Nicolas - Roncaglia Andrés - Santini Franco
 </section>
 <section id="section" class="slide level2 center">
 <h2></h2>
-<p>El fraude con tarjetas de crédito es una de las principales amenazas que sufren los bancos. Con el auge de la tecnología las transacciones digitales facilitaron los traspasos de dinero y los medios de pago electrónicos son algo de cada día, pero junto con las ventajas también vinieron las consecuencias, y es que los métodos de fraude se han vuelto más sofisticados, generando pérdidas significativas a los bancos y afectando la confianza de los usuarios. Actividades como el uso no autorizado de tarjetas, la clonación de datos y transacciones fraudulentas requieren el desarrollo de tecnologías avanzadas para la detección temprana y la prevención.</p>
+<!-- El fraude con tarjetas de crédito es una de las principales amenazas que sufren los bancos. Con el auge de la tecnología las transacciones digitales facilitaron los traspasos de dinero y los medios de pago electrónicos son algo de cada día, pero junto con las ventajas también vinieron las consecuencias, y es que los métodos de fraude se han vuelto más sofisticados, generando pérdidas significativas a los bancos y afectando la confianza de los usuarios. Actividades como el uso no autorizado de tarjetas, la clonación de datos y transacciones fraudulentas requieren el desarrollo de tecnologías avanzadas para la detección temprana y la prevención. -->
+<p>El fraude con tarjetas de crédito es una de las principales amenazas que sufren los bancos. Con el auge las transacciones digitales y los medios de pago electrónicos, se facilitaron los traspasos de dinero, pero junto con las ventajas también vinieron las consecuencias, y es que los métodos de fraude se han vuelto más sofisticados, generando pérdidas significativas a los bancos y afectando la confianza de los usuarios. Actividades como el uso no autorizado de tarjetas, la clonación de datos y transacciones fraudulentas requieren el desarrollo de tecnologías avanzadas para la detección temprana y la prevención.</p>
 </section>
 <section id="section-1" class="slide level2">
 <h2></h2>
@@ -348,20 +350,29 @@ Gamboa Nicolas - Roncaglia Andrés - Santini Franco
 <li><p><code>fraud_bool</code>: Indicadora de si la transacción fue fraude o no</p></li>
 <li><p><code>income</code>: Ingreso anual en cuantiles</p></li>
 <li><p><code>name_email_similarity</code>: Similitud del nombre en el email y el nombre del solicitante</p></li>
+<li><p><code>customer_age</code>: Edad del cliente en décadas</p></li>
+<li><p><code>days_since_request</code>: Días desde la solicitud</p></li>
 <li><p><code>payment_type</code>: Tipo del plan de pago</p></li>
-<li><p><code>credit_risk_score</code>: Score de riesgo de la aplicación</p></li>
-<li><p><code>email_is_free</code>: Tipo del dominio del email del aplicante (email pago o gratis)</p></li>
-<li><p><code>phone_home_valid</code>: Validez del telefono fijo provisto</p></li>
 </ul>
 </section>
 <section id="section-2" class="slide level2">
 <h2></h2>
 <ul>
+<li><p><code>employment_status</code>: Estado de empleo del solicitante</p></li>
+<li><p><code>credit_risk_score</code>: Score de riesgo de la aplicación</p></li>
+<li><p><code>email_is_free</code>: Tipo del dominio del email del aplicante (email pago o gratis)</p></li>
+<li><p><code>housing_status</code>: Estado residencial del aplicante</p></li>
+<li><p><code>phone_home_valid</code>: Validez del telefono fijo provisto</p></li>
 <li><p><code>phone_mobile_valid</code>: Validez del telefono movil provisto</p></li>
-<li><p><code>has_other_cards</code>: Indicador de si la persona tiene otra tarjeta en el mismo banco</p></li>
+</ul>
+</section>
+<section id="section-3" class="slide level2">
+<h2></h2>
+<ul>
+<li><p><code>has_other_cards</code>: Indicadora de si la persona tiene otra tarjeta en el mismo banco</p></li>
 <li><p><code>proposed_credit_limit</code>: Crédito limite propuesto por el aplicante</p></li>
-<li><p><code>foreign_request</code>: Indicadora de si la solicitud fue hecha en el mismo pais que el banco</p></li>
-<li><p><code>device_os</code>: Sistema operativo del dispositivo que hizo la solicitud</p></li>
+<li><p><code>foreign_request</code>: Indicadora de si la solicitud fue hecha en el pais del banco</p></li>
+<li><p><code>device_os</code>: Sistema operativo del dispositivo desde el que se hizo la solicitud</p></li>
 <li><p><code>keep_alive_session</code>: Indicadora de si el solicitante decidió mantener la sesión iniciada al ingresar</p></li>
 <li><p><code>device_distinct_emails_8w</code>: Número de emails distintos en la página del banco desde el mismo dispositivo usado en las últimas 8 semanas</p></li>
 </ul>
@@ -489,7 +500,7 @@ Cloglog
 <h2>Curva ROC</h2>
 
 <img data-src="Presentacion_files/figure-revealjs/unnamed-chunk-11-1.png" class="quarto-figure quarto-figure-center r-stretch" width="960"></section>
-<section id="section-3" class="slide level2">
+<section id="section-4" class="slide level2">
 <h2></h2>
 <div class="cell" data-layout-align="center">
 <div class="cell-output cell-output-stdout">

@@ -50,9 +50,9 @@ knitr::opts_chunk$set(fig.align = "center")
 data_og <- read.csv("Data/Base_resumida.csv") |> 
   mutate(
     income = factor(income),
-    proposed_credit_limit_cat = case_when(proposed_credit_limit == 190 ~ 200,
-                                          proposed_credit_limit == 200 ~ 200,
-                                          proposed_credit_limit == 210 ~ 200,
+    proposed_credit_limit_cat = case_when(proposed_credit_limit == 190 ~ 500,
+                                          proposed_credit_limit == 200 ~ 500,
+                                          proposed_credit_limit == 210 ~ 500,
                                           proposed_credit_limit == 490 ~ 500,
                                           proposed_credit_limit == 500 ~ 500,
                                           proposed_credit_limit == 510 ~ 500,
@@ -116,10 +116,9 @@ data <- data |>
   mutate(income_ord = as.numeric(income),
          proposed_credit_limit_cat_ord = as.numeric(proposed_credit_limit_cat),
          income = income_ord/10,
-         proposed_credit_limit = case_when(proposed_credit_limit_cat_ord == 1 ~ 200,
-                                          proposed_credit_limit_cat_ord == 2 ~ 500,
-                                          proposed_credit_limit_cat_ord == 3 ~ 1000,
-                                          proposed_credit_limit_cat_ord == 4 ~ 1500,
+         proposed_credit_limit = case_when(proposed_credit_limit_cat_ord == 1 ~ 500,
+                                          proposed_credit_limit_cat_ord == 2 ~ 1000,
+                                          proposed_credit_limit_cat_ord == 3 ~ 1500,
                                           T ~ 2000))
 
 # Creacion datos de testeo -----------------
@@ -148,10 +147,9 @@ data_test <- data_test |> select(-n, -proposed_credit_limit, -X) |>
   mutate(income_ord = as.numeric(income),
          proposed_credit_limit_cat_ord = as.numeric(proposed_credit_limit_cat),
          income = income_ord/10,
-         proposed_credit_limit = case_when(proposed_credit_limit_cat_ord == 1 ~ 200,
-                                          proposed_credit_limit_cat_ord == 2 ~ 500,
-                                          proposed_credit_limit_cat_ord == 3 ~ 1000,
-                                          proposed_credit_limit_cat_ord == 4 ~ 1500,
+         proposed_credit_limit = case_when(proposed_credit_limit_cat_ord == 1 ~ 500,
+                                          proposed_credit_limit_cat_ord == 2 ~ 1000,
+                                          proposed_credit_limit_cat_ord == 3 ~ 1500,
                                           T ~ 2000),
          housing_status = case_when(housing_status %in% c("BD", "BE", "BF") ~ "Otro",
                                T ~ housing_status),

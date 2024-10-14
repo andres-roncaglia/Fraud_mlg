@@ -164,9 +164,9 @@ knitr::opts_chunk$set(fig.align = "center")
 data_og <- read.csv("Data/Base_resumida.csv") |> 
   mutate(
     income = factor(income),
-    proposed_credit_limit_cat = case_when(proposed_credit_limit == 190 ~ 200,
-                                          proposed_credit_limit == 200 ~ 200,
-                                          proposed_credit_limit == 210 ~ 200,
+    proposed_credit_limit_cat = case_when(proposed_credit_limit == 190 ~ 500,
+                                          proposed_credit_limit == 200 ~ 500,
+                                          proposed_credit_limit == 210 ~ 500,
                                           proposed_credit_limit == 490 ~ 500,
                                           proposed_credit_limit == 500 ~ 500,
                                           proposed_credit_limit == 510 ~ 500,
@@ -254,10 +254,9 @@ data_test <- data_test |> select(-n, -proposed_credit_limit, -X) |>
   mutate(income_ord = as.numeric(income),
          proposed_credit_limit_cat_ord = as.numeric(proposed_credit_limit_cat),
          income = income_ord/10,
-         proposed_credit_limit = case_when(proposed_credit_limit_cat_ord == 1 ~ 200,
-                                          proposed_credit_limit_cat_ord == 2 ~ 500,
-                                          proposed_credit_limit_cat_ord == 3 ~ 1000,
-                                          proposed_credit_limit_cat_ord == 4 ~ 1500,
+         proposed_credit_limit = case_when(proposed_credit_limit_cat_ord == 1 ~ 500,
+                                          proposed_credit_limit_cat_ord == 2 ~ 1000,
+                                          proposed_credit_limit_cat_ord == 3 ~ 1500,
                                           T ~ 2000),
          housing_status = case_when(housing_status %in% c("BD", "BE", "BF") ~ "Otro",
                                T ~ housing_status),
@@ -397,7 +396,7 @@ En general, las personas que cometen fraude parecen preferir los métodos de pag
   geom_bar(color = "black", fill = "#070052") +
   xlab(label = "Crédito límite propuesto") +
   ylab(label = "Proporción") +
-  scale_y_continuous(limits = c(0,0.65))+
+  scale_y_continuous(limits = c(0,0.8))+
   ggtitle("No fraude")) +
 (data |> 
   filter(fraud_bool == 1) |> 
@@ -406,7 +405,7 @@ En general, las personas que cometen fraude parecen preferir los métodos de pag
   geom_bar(color = "black", fill = "#A21634") +
   xlab(label = "Crédito límite propuesto") +
   ylab(label = "Proporción") +
-  scale_y_continuous(limits = c(0,0.65))+
+  scale_y_continuous(limits = c(0,0.8))+
   ggtitle("Fraude")) + plot_layout(axes = "collect")
 ```
 
@@ -573,7 +572,6 @@ data <- data |>
 model <- glm(fraud_bool ~ ., data = data, family = binomial(link = "logit"), na.action = na.omit)
 
 # step(model, direction = "both", trace=0)
-# Customer age esta muy al limite asi que decidimos sacarla
 
 modelo_logit <- glm(fraud_bool ~ income + housing_status + 
     phone_home_valid + phone_mobile_valid + has_other_cards + 
@@ -666,13 +664,12 @@ Dado que el valor p resulta igual a $0.6906$ no se rechaza la hipótesis nula y 
 
 Nuevamente, para realizar el test se tuvo que crear variables de diseño y de scores, las cuales son:
 
-| Límite cred. propuesto | $L_1$ | $L_2$ | $L_3$ | $L_4$ | $S$ |
-|:----------------------:|:--:|:--:|:--:|:--:|:-:|
-| [0; 200]               |  0 |  0 |  0 |  0 | 1 |
-| (200; 500]             |  1 |  0 |  0 |  0 | 2 |
-| (500; 1000]            |  0 |  1 |  0 |  0 | 3 |
-| (1000; 1500]           |  0 |  0 |  1 |  0 | 4 |
-| (1500; 2000]           |  0 |  0 |  0 |  1 | 5 |
+| Límite cred. propuesto | $L_1$ | $L_2$ | $L_3$ | $S$ |
+|:----------------------:|:--:|:--:|:--:|:-:|
+| (0; 500]               |  0 |  0 |  0 | 1 |
+| (500; 1000]            |  1 |  0 |  0 | 2 |
+| (1000; 1500]           |  0 |  1 |  0 | 3 |
+| (1500; 2000]           |  0 |  0 |  1 | 4 |
 
 Modelo ordinal: 
 $$
@@ -684,7 +681,7 @@ Modelo categórico:
 $$
 logit(\pi_i) = \beta_0 + \beta_{I_1}\cdot I_{i} + \beta_{H1}\cdot H_{1i} + \beta_{H2}\cdot H_{2i} + \beta_{H3}\cdot H_{3i} + \beta_{Ph}\cdot Ph_i +
 $$
-$$+ \beta_{Pm}\cdot Pm_i +  \beta_C\cdot C_i + \beta_{L_1}\cdot L_{1i}+ \beta_{L_2}\cdot L_{2i} + \beta_{L_3}\cdot L_{3i} + \beta_{L_4}\cdot L_{4i} + \beta_{D1}\cdot D_{1i} + \beta_{D2}\cdot D_{2i} + \beta_{D3}\cdot D_{3i} + \beta_E\cdot E_i$$
+$$+ \beta_{Pm}\cdot Pm_i +  \beta_C\cdot C_i + \beta_{L_1}\cdot L_{1i}+ \beta_{L_2}\cdot L_{2i} + \beta_{L_3}\cdot L_{3i} + \beta_{D1}\cdot D_{1i} + \beta_{D2}\cdot D_{2i} + \beta_{D3}\cdot D_{3i} + \beta_E\cdot E_i$$
 
 Hipótesis: $H_0)$ La variable es lineal \ \ vs \ \ $H_1)$ La variable no es lineal
 
@@ -729,7 +726,7 @@ model_income_dummie <- glm(fraud_bool ~ income_dummie + housing_status +
 
 linealidad <- anova(model_income_ord, model_income_dummie)
 
-# pchisq(0.74044, 2,lower.tail = F) = 0.6905824
+# pchisq(0.69069, 2,lower.tail = F) = 0.7079761
 
 # No rechazo H0 por lo que la variable ingreso es lineal
 
@@ -749,18 +746,17 @@ model_cardlimit_cat <- glm(fraud_bool ~ income + housing_status +
 
 linealidad <- anova(model_cardlimit_ord, model_cardlimit_cat)
 
-# pchisq(5.1985, 3,lower.tail = F)
+# pchisq(3.132, 3,lower.tail = F) = 0.3717177
 
-# No se rechaza h0 por lo que la variable es lineaaaaal
+# No se rechaza h0 por lo que la variable es lineal
 
 data <- data |>
   mutate(
     income = as.numeric(income)/10,
     proposed_credit_limit_cat_ord = as.numeric(proposed_credit_limit_cat),
-    proposed_credit_limit = case_when(proposed_credit_limit_cat_ord == 1 ~ 200,
-                                          proposed_credit_limit_cat_ord == 2 ~ 500,
-                                          proposed_credit_limit_cat_ord == 3 ~ 1000,
-                                          proposed_credit_limit_cat_ord == 4 ~ 1500,
+    proposed_credit_limit = case_when(proposed_credit_limit_cat_ord == 1 ~ 500,
+                                          proposed_credit_limit_cat_ord == 2 ~ 1000,
+                                          proposed_credit_limit_cat_ord == 3 ~ 1500,
                                           T ~ 2000)
   )
 
@@ -776,11 +772,11 @@ modelo_logit <- glm(fraud_bool ~ income + housing_status +
     family = binomial(link = "logit"), 
     na.action = na.omit)
 
-# summary(modelo_logit)
+summary(modelo_logit)
 
 ```
 
-Además, se propusieron ciertas interacciones, más precisamente la interacción entre la validez del número de teléfono móvil brindado y la tenencia de otra tarjeta en el banco, y entre la validez del número de teléfono móvil brindado y el ingreso. Si bien estas resultaron significativas al realizar el test de razón de verosimilitud, al ya contar con muchas variables se decidió no incluirlas para no complejizar el modelo y su interpretabilidad. Sin embargo este modelo será utilizado más adelante como motivo de comparación con el modelo ajustado.
+Además, se propusieron ciertas interacciones, más precisamente la interacción entre la validez del número de teléfono móvil brindado y la tenencia de otra tarjeta en el banco, y entre la validez del número de teléfono móvil brindado y el ingreso. Si bien estas resultaron significativas al realizar el test de razón de verosimilitud, al ya contar con muchas variables se decidió no incluirlas para no complejizar el modelo y su interpretabilidad. Sin embargo este modelo será utilizado más adelante con motivo de comparación con el modelo ajustado.
 
 
 ```{r}
@@ -796,7 +792,7 @@ modelo_logit_1 <- glm(fraud_bool ~ income + housing_status +
 
 # summary(modelo_logit_1)
 # anova(modelo_logit, modelo_logit_1)
-# pchisq(3.9032, 1, lower.tail = F)
+# pchisq(0.039319, 1, lower.tail = F) = 0.842818
 
 
 modelo_logit_2 <- glm(fraud_bool ~ income + housing_status + 
@@ -806,7 +802,8 @@ modelo_logit_2 <- glm(fraud_bool ~ income + housing_status +
     family = binomial(link = "logit"), 
     na.action = na.omit)
 
-# anova(modelo_logit, modelo_logit_2)
+anova(modelo_logit, modelo_logit_2)
+# pchisq(4.2374, 1, lower.tail = F) = 0.03954268
 
 
 
@@ -817,7 +814,8 @@ modelo_logit_3 <- glm(fraud_bool ~ income + housing_status +
     family = binomial(link = "logit"), 
     na.action = na.omit)
 
-# anova(modelo_logit_2, modelo_logit_3)
+anova(modelo_logit_2, modelo_logit_3)
+# pchisq(5.5406, 1, lower.tail = F) = 0.01858021
 
 # summary(modelo_logit_2)
 ```
@@ -841,7 +839,7 @@ modelo_logit.2 <- glm(fraud_bool ~ income + housing_status +
     na.action = na.omit)
 
 
-# anova(modelo_logit, modelo_logit.2, test="LRT")
+anova(modelo_logit, modelo_logit.2, test="LRT")
 
 # Este enlace es apropiado
 
@@ -861,7 +859,7 @@ modelo_probit.2 <- glm(fraud_bool ~ income + housing_status +
     family = binomial(link = "probit"),
     na.action = na.omit)
 
-# anova(modelo_probit, modelo_probit.2, test="LRT")
+anova(modelo_probit, modelo_probit.2, test="LRT")
 
 # Este enlace es apropiado
 
@@ -882,31 +880,30 @@ modelo_cloglog.2 <- glm(fraud_bool ~ income + housing_status +
     family = binomial(link = "cloglog"),
     na.action = na.omit)
 
-# anova(modelo_cloglog, modelo_cloglog.2, test="LRT")
+anova(modelo_cloglog, modelo_cloglog.2, test="LRT")
 
 # Este enlace es apropiado
 
 ```
 
+```{r Test hosmer y lemeshow, eval = FALSE}
+hltest(modelo_logit)
+hltest(modelo_probit)
+hltest(modelo_cloglog)
+```
 
 |   Enlace  | Estadistica test RV | Grados de libertad test RV | Valor p test RV | Estadistica test H-L | Grados de libertad test H-L | Valor p  test H-L |
 |:---------:|:-------------------:|:--------------------------:|:---------------:|:--------------------:|:---------------------------:|:-----------------:|
-| Logístico |        0.8010       |              1             |      0.3708     |        2.7342        |              8              |       0.9499      |
-|   Probit  |        1.9706       |              1             |      0.1604     |        5.7644        |              8              |       0.6736      |
-|  Cloglog  |        0.0015       |              1             |      0.9682     |        2.6860        |              8              |       0.9525      |
+| Logístico |        0.3378       |              1             |      0.5611     |        2.7347        |              8              |       0.9499      |
+|   Probit  |        1.2196       |              1             |      0.2694     |        4.6065        |              8              |       0.7987      |
+|  Cloglog  |        0.0646       |              1             |      0.7994     |        3.3802        |              8              |       0.9083      |
 
 :Test de comprobación de la función de enlace y bondad del ajuste
 
 Los tres enlaces son apropiados, por lo tanto nos quedamos con el enlace logit por su facilidad en la interpretación.
 
-```{r Test hosmer y lemeshow}
-# hltest(modelo_logit_3)
-# hltest(modelo_logit)
-# hltest(modelo_probit)
-# hltest(modelo_cloglog)
-```
 
-### Modelo estimado
+## Modelo estimado
 
 $$
 logit(\pi_i) = \hat\beta_0 + \hat\beta_I\cdot I_i + \hat\beta_{H1}\cdot H_{1i} + \hat\beta_{H2}\cdot H_{2i} + \hat\beta_{H3}\cdot H_{3i} + \hat\beta_{Ph}\cdot Ph_i +$$
@@ -991,8 +988,6 @@ Viendo el gráfico y el test de Shapiro-Wilks para la normalidad de los errores,
 
 
 ```{r RO modelo sin interacciones}
-#| tbl-cap: "Razones de odds del modelo ajustado"
-
 tabla_ro <- data.frame(
   RO = c(
     "Límite propuesto",
@@ -1020,7 +1015,11 @@ tabla_ro <- data.frame(
     )
   
 )
+```
 
+
+```{r RO modelo sin interacciones tabla}
+#| tbl-cap: "Razones de odds del modelo ajustado"
 knitr::kable(tabla_ro, digits = 4)
 ```
 

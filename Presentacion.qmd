@@ -170,9 +170,11 @@ data <- data |> select(-n, -X)
 
 
 
-## {.center}
+## Motivación {.center}
 
-El fraude con tarjetas de crédito es una de las principales amenazas que sufren los bancos. Con el auge las transacciones digitales y los medios de pago electrónicos, se facilitaron los traspasos de dinero, pero junto con las ventajas también vinieron las consecuencias, y es que los métodos de fraude se han vuelto más sofisticados, generando pérdidas significativas a los bancos y afectando la confianza de los usuarios. Actividades como el uso no autorizado de tarjetas, la clonación de datos y transacciones fraudulentas requieren el desarrollo de tecnologías avanzadas para la detección temprana y la prevención.
+El fraude con tarjetas de crédito es una de las principales amenazas que sufren los bancos. Ya que los métodos de fraude se han vuelto más sofisticados, generando pérdidas significativas a los bancos y afectando la confianza de los usuarios, resulta de gran importancia estudiar qué perfiles de clientes son los más propensos a cometer fraude. 
+
+<!-- El fraude con tarjetas de crédito es una de las principales amenazas que sufren los bancos. Con el auge las transacciones digitales y los medios de pago electrónicos, se facilitaron los traspasos de dinero, pero junto con las ventajas también vinieron las consecuencias, y es que los métodos de fraude se han vuelto más sofisticados, generando pérdidas significativas a los bancos y afectando la confianza de los usuarios. Actividades como el uso no autorizado de tarjetas, la clonación de datos y transacciones fraudulentas requieren el desarrollo de tecnologías avanzadas para la detección temprana y la prevención. -->
 
 ## {.smaller}
 
@@ -230,7 +232,7 @@ dt1 <- data |>
 (data |> 
   ggplot() +
   aes(x = fraud_bool, y = (after_stat(count))/sum(after_stat(count)))+
-  geom_bar(color = "black", fill = c("#4A5899", "#F2545B")) +
+  geom_bar(color = "grey70", fill = c("#4A5899", "#F2545B")) +
   xlab(label = "Fraude") +
   ylab(label = "Proporción") +
   scale_y_continuous(limits = c(0,1)) +
@@ -245,7 +247,7 @@ dt1 <- data |>
   filter(fraud_bool == 0) |> 
   ggplot() +
   aes(x = income, y = (after_stat(count))/sum(after_stat(count)))+
-  geom_bar(color = "black", fill = "#4A5899") +
+  geom_bar(color = "grey70", fill = "#4A5899") +
   xlab(label = "Ingreso anual") +
   ylab(label = "Proporción") +
   scale_x_continuous(breaks = seq(0.1,0.9,0.1)) +
@@ -255,7 +257,7 @@ dt1 <- data |>
    filter(fraud_bool == 1) |> 
    ggplot() +
    aes(x = income, y = (after_stat(count))/sum(after_stat(count)))+
-   geom_bar(color = "black", fill = "#F2545B") +
+   geom_bar(color = "grey70", fill = "#F2545B") +
    xlab(label = "Ingreso anual") +
    ylab(label = "Proporción") +
    scale_y_continuous(limits = c(0,0.6)) +
@@ -271,38 +273,62 @@ dt1 <- data |>
   filter(fraud_bool == 0) |> 
   ggplot() +
   aes(x = proposed_credit_limit_cat, y = after_stat(count)/sum(after_stat(count)))+
-  geom_bar(color = "black", fill = "#4A5899") +
+  geom_bar(color = "grey70", fill = "#4A5899") +
   xlab(label = "Crédito límite propuesto") +
   ylab(label = "Proporción") +
-  scale_y_continuous(limits = c(0,0.65))+
-  ggtitle("No fraude")) +
+  scale_y_continuous(limits = c(0,0.85))+
+  ggtitle("No fraude")+
+   geom_text(aes(label = after_stat(count), 
+                y = after_stat(count)/sum(after_stat(count)) + 0.02), 
+            stat = "count", 
+            size = 5,
+            vjust = 0,
+            color = "grey70")) +
 (data |> 
   filter(fraud_bool == 1) |> 
   ggplot() +
   aes(x = proposed_credit_limit_cat, y = after_stat(count)/sum(after_stat(count)))+
-  geom_bar(color = "black", fill = "#F2545B") +
+  geom_bar(color = "grey70", fill = "#F2545B") +
   xlab(label = "Crédito límite propuesto") +
   ylab(label = "Proporción") +
-  scale_y_continuous(limits = c(0,0.65))+
-  ggtitle("Fraude")) + plot_layout(axes = "collect") + # desde acá
+  scale_y_continuous(limits = c(0,0.85))+
+  ggtitle("Fraude")+
+   geom_text(aes(label = after_stat(count), 
+                y = after_stat(count)/sum(after_stat(count)) + 0.02), 
+            stat = "count", 
+            size = 5,
+            vjust = 0,
+            color = "grey70")) + plot_layout(axes = "collect") + # desde acá
   (data |> 
   filter(fraud_bool == 0) |> 
   ggplot() +
   aes(x = payment_type, y = (after_stat(count))/sum(after_stat(count)))+
-  geom_bar(color = "black", fill = "#4A5899") +
+  geom_bar(color = "grey70", fill = "#4A5899") +
   xlab(label = "Tipo del plan de pago") +
   ylab(label = "Proporción") +
   scale_y_continuous(limits = c(0,0.7)) +
-  ggtitle("No fraude")) +
+  ggtitle("No fraude")+
+   geom_text(aes(label = after_stat(count), 
+                y = after_stat(count)/sum(after_stat(count)) + 0.02), 
+            stat = "count", 
+            size = 5,
+            vjust = 0,
+            color = "grey70")) +
 (data |> 
   filter(fraud_bool == 1) |> 
   ggplot() +
   aes(x = payment_type, y = (after_stat(count))/sum(after_stat(count)))+
-  geom_bar(color = "black", fill = "#F2545B") +
+  geom_bar(color = "grey70", fill = "#F2545B") +
   xlab(label = "Tipo del plan de pago") +
   ylab(label = "Proporción") +
   scale_y_continuous(limits = c(0,0.7)) +
-  ggtitle("Fraude")) + plot_layout(axes = "collect")
+  ggtitle("Fraude")+
+   geom_text(aes(label = after_stat(count), 
+                y = after_stat(count)/sum(after_stat(count)) + 0.02), 
+            stat = "count", 
+            size = 5,
+            vjust = 0,
+            color = "grey70")) + plot_layout(axes = "collect")
 #   (data |> 
 #     filter(fraud_bool == 0) |> 
 #     ggplot() +
@@ -333,7 +359,7 @@ dt1 <- data |>
    mutate(prop = prop/sum(prop)) |> 
   ggplot() +
   aes(x = has_other_cards, y = prop, fill = fraud_bool, group = fraud_bool)+
-  geom_bar(color = "black", position = "dodge", stat = "identity") +
+  geom_bar(color = "grey70", position = "dodge", stat = "identity") +
   xlab(label = "Tenencia de otras tarjetas") +
   ylab(label = "Proporción") +
   labs(fill = "Fraude") +
@@ -346,7 +372,7 @@ dt1 <- data |>
    mutate(prop = prop/sum(prop)) |> 
   ggplot() +
   aes(x = device_distinct_emails_8w, y = prop, fill = fraud_bool, group = fraud_bool)+
-  geom_bar(color = "black", position = "dodge", stat = "identity") +
+  geom_bar(color = "grey70", position = "dodge", stat = "identity") +
   xlab(label = "Número de emails distintos en la página\ndel banco en las últimas 8 semanas") +
   ylab(label = "Proporción") +
   labs(fill = "Fraude") +
@@ -366,7 +392,7 @@ dt1 <- data |>
    mutate(prop = prop/sum(prop)) |> 
   ggplot() +
   aes(x = email_is_free, y = prop, fill = fraud_bool, group = fraud_bool)+
-  geom_bar(color = "black", position = "dodge", stat = "identity") +
+  geom_bar(color = "grey70", position = "dodge", stat = "identity") +
   xlab(label = "Dominio del email") +
   ylab(label = "Proporción") +
   labs(fill = "Fraude") +
@@ -379,7 +405,7 @@ dt1 <- data |>
    mutate(prop = prop/sum(prop)) |> 
   ggplot() +
   aes(x = keep_alive_session, y = prop, fill = fraud_bool, group = fraud_bool)+
-  geom_bar(color = "black", position = "dodge", stat = "identity") +
+  geom_bar(color = "grey70", position = "dodge", stat = "identity") +
   xlab(label = "Mantener sesión abierta") +
   ylab(label = "Proporción") +
   labs(fill = "Fraude") +
@@ -395,7 +421,7 @@ dt1 <- data |>
   filter(fraud_bool == 0) |> 
   ggplot() +
   aes(x = device_os, y = after_stat(count)/sum(after_stat(count)))+
-  geom_bar(color = "black", fill = "#4A5899") +
+  geom_bar(color = "grey70", fill = "#4A5899") +
   xlab(label = "Sistema operativo del dispositivo utilizado") +
   ylab(label = "Proporción") +
   geom_text(aes(label = after_stat(count), 
@@ -410,7 +436,7 @@ dt1 <- data |>
   filter(fraud_bool == 1) |> 
   ggplot() +
   aes(x = device_os, y = after_stat(count)/sum(after_stat(count)))+
-  geom_bar(color = "black", fill = "#F2545B") +
+  geom_bar(color = "grey70", fill = "#F2545B") +
   xlab(label = "Sistema operativo del dispositivo utilizado") +
   ylab(label = "Proporción") +
   scale_y_continuous(limits = c(0,0.65))+
@@ -425,7 +451,7 @@ dt1 <- data |>
   filter(fraud_bool == 0) |> 
   ggplot() +
   aes(x = housing_status, y = after_stat(count)/sum(after_stat(count)))+
-  geom_bar(color = "black", fill = "#4A5899") +
+  geom_bar(color = "grey70", fill = "#4A5899") +
   xlab(label = "Estado residencial del cliente") +
   ylab(label = "Proporción") +
   geom_text(aes(label = after_stat(count), 
@@ -440,7 +466,7 @@ dt1 <- data |>
   filter(fraud_bool == 1) |> 
   ggplot() +
   aes(x = housing_status, y = after_stat(count)/sum(after_stat(count)))+
-  geom_bar(color = "black", fill = "#F2545B") +
+  geom_bar(color = "grey70", fill = "#F2545B") +
   xlab(label = "Estado residencial del cliente") +
   ylab(label = "Proporción") +
   scale_y_continuous(limits = c(0,0.65))+
@@ -544,19 +570,20 @@ hltest(modelo_logit, verbose = F)
 ```{r tabla test enlace}
 data.frame(
   Enalce = c("Logístico", "Probit", "Cloglog"),
-  est_rv = c(0.8010, 1.9706, 0.0015),
+  est_rv = c(0.3378, 1.2196, 0.0646),
   gl_rv = c(1, 1, 1),
-  p_value_rv = c(0.3708, 0.1604, 0.9682),
-  est_hl = c(2.7342, 5.7644, 2.6860),
+  p_value_rv = c(0.5611, 0.2694, 0.7994),
+  est_hl = c(2.7347, 4.6065, 3.3802),
   gl_hl = c(8, 8, 8),
-  p_value_hl = c(0.9499, 0.6736, 0.9525)
+  p_value_hl = c(0.9499, 0.7987, 0.9083)
 ) |> 
   `colnames<-`(c("Enlace", "Est. RV", "GL RV", "Valor-p RV", "Est. HL", "GL HL", "Valor-p HL")) |>
   kable() |> 
   kable_styling() |> 
-  row_spec(0, background = "#F2545B", color = "grey90") |> 
-  row_spec(1:3, background = "#191919", color = "grey90") |> 
-  column_spec(1, background = "#191919")
+  row_spec(0, background = "black", color = "grey90", bold = T) |> 
+  row_spec(1:3, background = "#191919", color = "grey90", hline_after = T) |> 
+  column_spec(1, background = "#191919") |> 
+  row_spec(1, background = "#95373C", color = "grey90", hline_after = T)
 ```
 
 
@@ -639,7 +666,7 @@ ggplot(data_enlaces, aes(sample = rQ.logit)) +
   stat_qq(distribution = qnorm, fill = "#F2545B", shape = 21, size = 3, alpha = 0.4) +
   stat_qq_line(color = "grey90") +
   annotate(geom = "label", label = paste("Test de Normalidad Shapiro-Wilks\n p-value:", round(shapiro.test(rQ.logit)$p.value, 2)), x = 0.9, y = -1.5, fill = "grey13", color = "grey90") +
-  labs(title = "Gráfico probabilístico normal con residuos cuantil",  x = "Cuantiles teóricos", y = "Cuantiles de los residuos cuantil")
+  labs(x = "Cuantiles teóricos", y = "Cuantiles de los residuos cuantil")
 
 
 ```
@@ -655,7 +682,7 @@ tabla_ro <- data.frame(
   RO = c(
     "Límite propuesto (100 unidades)",
     "Teléfono fijo (Válido vs No válido)",
-    "Ingreso (0.1 unidades)",
+    "Ingreso (en un decíl)",
     "Tenencia otra tarjeta (Si vs No)"
   ),
   Estimación = c(
@@ -681,9 +708,9 @@ tabla_ro <- data.frame(
 
 kable(tabla_ro, digits = 4) |> 
   kable_styling() |> 
-  row_spec(0, background = "#F2545B", color = "grey90") |> 
-  row_spec(1:4, background = "#191919", color = "grey90") |> 
-  column_spec(1, background = "#191919")
+  row_spec(0, background = "black", color = "grey90") |> 
+  column_spec(1, background = "#191919") |> 
+  row_spec(1:4, background = "#191919", color = "grey90", font_size = 30, extra_css = "border-bottom-style: none")
   
 ```
 
@@ -747,7 +774,7 @@ data.frame(matriz_confucion$table) |>
   ggplot() +
   aes(x = Prediction, y = Reference, fill = Freq, label = Freq) +
   geom_tile(color = "black") +
-  geom_label(color = "black") +
+  geom_label(color = "black", size = 5) +
   scale_fill_gradient(low = "#cfeac8", high = "#017A39") +
   labs(x = "Valor Predicho", y = "Valor Observado",
        caption = paste0("Precisión: ", round(matriz_confucion$overall[1], 2), "        |        ",
@@ -791,7 +818,7 @@ data.frame(matriz_confucion$table) |>
   ggplot() +
   aes(x = Prediction, y = Reference, fill = Freq, label = Freq) +
   geom_tile(color = "black") +
-  geom_label(color = "black") +
+  geom_label(color = "black", size = 5) +
   scale_fill_gradient(low = "#cfeac8", high = "#017A39") +
   labs(x = "Valor Predicho", y = "Valor Observado",
        caption = paste0("Precisión: ", round(matriz_confucion$overall[1], 2), "        |        ",

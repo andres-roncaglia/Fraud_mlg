@@ -629,7 +629,9 @@ $D_{3i} = \left \{ \begin{matrix} 0 \ \ \ \text{Si el sistema operativo del disp
 
 $E_i$: Cantidad de emails registrados en la página del banco del i-ésimo cliente.
 
-Luego, al tener 2 variables continuas (ingreso y credito límite propuesto), se decidió comprobar la linealidad de estas. Para testear esto se implementó el test de razón de verosimilitud, en el que se compara el modelo que considera a la variable como ordinal (asignando scores) y el modelo que considera a la variable como categórica (asignando variables de diseño).
+### Comprobación de la linealidad
+
+Al tener 2 variables continuas (ingreso y credito límite propuesto), se decidió comprobar la linealidad de estas. Para testearlo se implementó el test de razón de verosimilitud, en el que se compara el modelo que considera a la variable como ordinal (asignando scores) y el modelo que considera a la variable como categórica (asignando variables de diseño).
 
 ##### Ingreso
 
@@ -658,7 +660,7 @@ Hipótesis: $H_0)$ La variable es lineal \ \ vs \ \ $H_1)$ La variable no es lin
 
 Estadística: $G^2 = -2(Ln(L_{ord}) - Ln(L_{cat})) \underset{H_0}{\sim} \chi^2_{2}$
 
-Dado que el valor p resulta igual a $0.6906$ no se rechaza la hipótesis nula y por lo tanto se introduce la variable al modelo como lineal.
+Dado que el valor p resulta igual a $0.7080$ no se rechaza la hipótesis nula y por lo tanto se introduce la variable al modelo como lineal.
 
 ##### Crédito límite propuesto
 
@@ -687,7 +689,7 @@ Hipótesis: $H_0)$ La variable es lineal \ \ vs \ \ $H_1)$ La variable no es lin
 
 Estadística: $G^2 = -2(Ln(L_{ord}) - Ln(L_{cat})) \underset{H_0}{\sim} \chi^2_{2}$
 
-Dado que el valor p resulta igual a $0.1578$ no se rechaza la hipótesis nula y por lo tanto se introduce la variable al modelo como lineal.
+Dado que el valor p resulta igual a $0.3717$ no se rechaza la hipótesis nula y por lo tanto se introduce la variable al modelo como lineal.
 
 ```{r}
 
@@ -772,7 +774,7 @@ modelo_logit <- glm(fraud_bool ~ income + housing_status +
     family = binomial(link = "logit"), 
     na.action = na.omit)
 
-summary(modelo_logit)
+# summary(modelo_logit)
 
 ```
 
@@ -802,7 +804,7 @@ modelo_logit_2 <- glm(fraud_bool ~ income + housing_status +
     family = binomial(link = "logit"), 
     na.action = na.omit)
 
-anova(modelo_logit, modelo_logit_2)
+# anova(modelo_logit, modelo_logit_2)
 # pchisq(4.2374, 1, lower.tail = F) = 0.03954268
 
 
@@ -814,12 +816,14 @@ modelo_logit_3 <- glm(fraud_bool ~ income + housing_status +
     family = binomial(link = "logit"), 
     na.action = na.omit)
 
-anova(modelo_logit_2, modelo_logit_3)
+# anova(modelo_logit_2, modelo_logit_3)
 # pchisq(5.5406, 1, lower.tail = F) = 0.01858021
 
 # summary(modelo_logit_2)
 ```
 
+
+### Comprobación del enlace
 
 Una vez definida la componente lineal se decidió comprobar el enlace:
 
@@ -839,7 +843,7 @@ modelo_logit.2 <- glm(fraud_bool ~ income + housing_status +
     na.action = na.omit)
 
 
-anova(modelo_logit, modelo_logit.2, test="LRT")
+# anova(modelo_logit, modelo_logit.2, test="LRT")
 
 # Este enlace es apropiado
 
@@ -859,7 +863,7 @@ modelo_probit.2 <- glm(fraud_bool ~ income + housing_status +
     family = binomial(link = "probit"),
     na.action = na.omit)
 
-anova(modelo_probit, modelo_probit.2, test="LRT")
+# anova(modelo_probit, modelo_probit.2, test="LRT")
 
 # Este enlace es apropiado
 
@@ -880,16 +884,16 @@ modelo_cloglog.2 <- glm(fraud_bool ~ income + housing_status +
     family = binomial(link = "cloglog"),
     na.action = na.omit)
 
-anova(modelo_cloglog, modelo_cloglog.2, test="LRT")
+# anova(modelo_cloglog, modelo_cloglog.2, test="LRT")
 
 # Este enlace es apropiado
 
 ```
 
 ```{r Test hosmer y lemeshow, eval = FALSE}
-hltest(modelo_logit)
-hltest(modelo_probit)
-hltest(modelo_cloglog)
+# hltest(modelo_logit)
+# hltest(modelo_probit)
+# hltest(modelo_cloglog)
 ```
 
 |   Enlace  | Estadistica test RV | Grados de libertad test RV | Valor p test RV | Estadistica test H-L | Grados de libertad test H-L | Valor p  test H-L |
@@ -990,10 +994,10 @@ Viendo el gráfico y el test de Shapiro-Wilks para la normalidad de los errores,
 ```{r RO modelo sin interacciones}
 tabla_ro <- data.frame(
   RO = c(
-    "Límite propuesto",
-    "Teléfono fijo:Válido",
-    "Ingreso",
-    "Tenencia otra tarjeta"
+    "Límite propuesto (100 unidades)",
+    "Teléfono fijo (Válido vs No válido)",
+    "Ingreso (en un decíl)",
+    "Tenencia otra tarjeta (Si vs No)"
   ),
   Estimación = c(
                  exp(as.numeric(modelo_logit$coefficients["proposed_credit_limit"])*100),
@@ -1023,13 +1027,13 @@ tabla_ro <- data.frame(
 knitr::kable(tabla_ro, digits = 4)
 ```
 
-La chance de que un cliente cometa fraude aumenta entre un 5% y un 18% cuando el límite del crédito propuesto aumenta en 100 unidades monetarias, cuando las demás variables son constantes.
+La chance de que un cliente cometa fraude aumenta entre un 7% y un 23% cuando el límite del crédito propuesto aumenta en 100 unidades monetarias, cuando las demás variables son constantes.
 
-A su vez, cuando el cliente proporciona un telefono fijo válido, la chance de que este cometa fraude es como mínimo un 41% y como máximo un 88% menor que la de una persona que no proporcionó un telefono fijo válido, cuando el resto de las variables son constantes.
+A su vez, cuando el cliente proporciona un telefono fijo válido, la chance de que este cometa fraude es como mínimo un 42% y como máximo un 88% menor que la de una persona que no proporcionó un telefono fijo válido, cuando el resto de las variables son constantes.
 
-Cuando el ingreso del cliente aumenta en un decil, la chance de que cometa fraude aumenta entre un 12% y un 50%, cuando las variables son constantes.
+Cuando el ingreso del cliente aumenta en un decil, la chance de que cometa fraude aumenta entre un 11% y un 49%, cuando las variables son constantes.
 
-Los clientes que tienen otra tarjeta en el mismo banco tienen una chance de cometer fraude entre un 14% y un 86% menor que aquellos que no tienen, cuando el resto de las variables son constantes.
+Los clientes que tienen otra tarjeta en el mismo banco tienen una chance de cometer fraude entre un 14% y un 89% menor que aquellos que no tienen, cuando el resto de las variables son constantes.
 
 Las características de las personas más propensas a cometer fraude son:
 
@@ -1170,7 +1174,7 @@ data.frame(matriz_confucion$table) |>
                         )) +
   theme_bw() + 
   theme(legend.position = "none",
-        plot.caption = element_text(hjust=0.5,size = 11))
+        plot.caption = element_text(hjust=0.5,size = 10))
 ```
 
 Observando las matrices de confusión y las métricas de comparación, haciendo énfasis en la sensibilidad, se puede notar que el modelo de efectos principales tiene una mejor capacidad preditiva en base al objetivo propuesto que el modelo que tiene 2 efectos más.
